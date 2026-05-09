@@ -148,6 +148,11 @@ export default function App() {
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [visibleOutputId, setVisibleOutputId] = useState(null);
 
+  const [documentLibraryOpen, setDocumentLibraryOpen] = useState(false);
+  const [savedDocuments, setSavedDocuments] = useState([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [visibleDocumentId, setVisibleDocumentId] = useState(null);
+
   const [stats, setStats] = useState({
     totalChats: 0,
     savedImages: 0,
@@ -607,21 +612,27 @@ ${chatText}`;
       );
 
       if (res.data.success) {
-        setFileMode(true);
-        setUploadedFileName(res.data.fileName || file.name);
+  const fileName = res.data.fileName || file.name;
+  const summaryText = res.data.summary;
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "ai",
-            text:
-              res.data.summary +
-              `\n\n✅ File saved for Q&A. Now you can ask questions from this file.`,
-          },
-        ]);
+  setFileMode(true);
+  setUploadedFileName(fileName);
 
-        speakText(res.data.summary);
-      }
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "ai_document",
+      text:
+        summaryText +
+        `\n\n✅ File saved for Q&A. Now you can ask questions from this file.`,
+      fileName,
+      fileType: file.type === "application/pdf" ? "pdf" : "txt",
+      summary: summaryText,
+    },
+  ]);
+
+  speakText(summaryText);
+}
     } catch (error) {
       console.error("File summary error:", error);
 
@@ -1019,6 +1030,90 @@ Reply in the same language style as the user.
       },
     ]);
   };
+
+  const loadDocumentLibrary = async () => {
+  try {
+    const authConfig = await getAuthHeaders();
+
+    setDocumentsLoading(true);
+
+    const res = await axios.get(`${API_URL}/api/documents`, authConfig);
+
+    if (res.data.success) {
+      setSavedDocuments(res.data.documents || []);
+    }
+  } catch (error) {
+    console.error("Load documents error:", error);
+    alert("Failed to load document library.");
+  } finally {
+    setDocumentsLoading(false);
+  }
+};
+
+const openDocumentLibrary = async () => {
+  setCurrentView("documents");
+  setDocumentLibraryOpen(true);
+  setGalleryOpen(false);
+  setLibraryOpen(false);
+  setSidebarOpen(false);
+  setVisibleDocumentId(null);
+
+  await loadDocumentLibrary();
+};
+
+const saveDocumentToLibrary = async (fileName, summary, fileType = "document") => {
+  if (!fileName || !summary) {
+    alert("No document summary to save");
+    return;
+  }
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    const res = await axios.post(
+      `${API_URL}/api/documents/save`,
+      {
+        fileName,
+        summary,
+        fileType,
+      },
+      authConfig
+    );
+
+    if (res.data.success) {
+      alert("Document saved ✅");
+      await loadDocumentLibrary();
+    }
+  } catch (error) {
+    console.error("Save document error:", error);
+    alert("Failed to save document.");
+  }
+};
+
+const deleteSavedDocument = async (id) => {
+  const confirmDelete = window.confirm("Delete this saved document?");
+  if (!confirmDelete) return;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    await axios.delete(`${API_URL}/api/documents/${id}`, authConfig);
+
+    setSavedDocuments((prev) => prev.filter((doc) => doc.id !== id));
+  } catch (error) {
+    console.error("Delete document error:", error);
+    alert("Failed to delete document.");
+  }
+};
+
+const copyDocumentSummary = async (summary) => {
+  try {
+    await navigator.clipboard.writeText(summary);
+    alert("Copied ✅");
+  } catch (error) {
+    alert("Copy failed");
+  }
+};
 
   const loadContentLibrary = async () => {
     try {
@@ -1888,16 +1983,24 @@ Reply in the same language style as the user.
         </div>
 
         <div className="library-box">
-          <p>Content Library</p>
+  <p>Content Library</p>
 
-          <button onClick={openContentLibrary}>Open Saved Outputs</button>
-        </div>
+  <button onClick={openContentLibrary}>Open Saved Outputs</button>
+</div>
 
-        <div className="gallery-box">
-          <p>Image Gallery</p>
+<div className="document-box">
+  <p>Document Library</p>
 
-          <button onClick={openGallery}>Open Saved Gallery</button>
-        </div>
+  <button onClick={openDocumentLibrary}>
+    Open Saved Documents
+  </button>
+</div>
+
+<div className="gallery-box">
+  <p>Image Gallery</p>
+
+  <button onClick={openGallery}>Open Saved Gallery</button>
+</div>
 
         <div className="history">
           <p>Recent Chats</p>
@@ -2212,6 +2315,76 @@ Reply in the same language style as the user.
                 )}
               </div>
             </div>
+            ) : currentView === "documents" ? (
+  <div className="document-library-view">
+    <div className="document-library-header">
+      <div>
+        <h2>Document Library</h2>
+        <p>Your saved PDF/TXT summaries are stored here.</p>
+      </div>
+
+      <button
+        onClick={() => {
+          setCurrentView("chat");
+          setDocumentLibraryOpen(false);
+          setVisibleDocumentId(null);
+        }}
+      >
+        Back to Chat
+      </button>
+    </div>
+
+    {documentsLoading ? (
+      <div className="document-empty">Loading saved documents...</div>
+    ) : savedDocuments.length === 0 ? (
+      <div className="document-empty">No saved documents yet.</div>
+    ) : (
+      <div className="document-list">
+        {savedDocuments.map((doc) => (
+          <div className="document-card" key={doc.id}>
+            <div className="document-card-top">
+              <div>
+                <h3>{doc.file_name}</h3>
+                <span>{doc.file_type}</span>
+              </div>
+
+              <small>{new Date(doc.created_at).toLocaleDateString()}</small>
+            </div>
+
+            <div className="document-actions">
+              <button
+                onClick={() =>
+                  setVisibleDocumentId(
+                    visibleDocumentId === doc.id ? null : doc.id
+                  )
+                }
+              >
+                {visibleDocumentId === doc.id ? "Hide" : "Open"}
+              </button>
+
+              <button onClick={() => copyDocumentSummary(doc.summary)}>
+                Copy
+              </button>
+
+              <button
+                className="delete-document-btn"
+                onClick={() => deleteSavedDocument(doc.id)}
+              >
+                Delete
+              </button>
+            </div>
+
+            {visibleDocumentId === doc.id && (
+              <div className="document-content">
+                {doc.summary}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+  
           ) : currentView === "library" ? (
             <div className="content-library-view">
               <div className="content-library-header">
@@ -2349,6 +2522,26 @@ Reply in the same language style as the user.
                   <strong>{msg.role === "user" ? "You" : assistantName}</strong>
                   <p>{msg.text}</p>
 
+                  {msg.role === "ai_document" && (
+  <div className="message-actions">
+    <button
+      onClick={() =>
+        saveDocumentToLibrary(
+          msg.fileName,
+          msg.summary || msg.text,
+          msg.fileType || "document"
+        )
+      }
+    >
+      Save Document
+    </button>
+
+    <button onClick={() => copyDocumentSummary(msg.summary || msg.text)}>
+      Copy Summary
+    </button>
+  </div>
+)}
+
                   {msg.role === "ai" && (
                     <div className="message-actions">
                       <button onClick={() => saveOutputToLibrary(msg.text, "ai_output")}>
@@ -2429,6 +2622,7 @@ Reply in the same language style as the user.
         {currentView !== "dashboard" &&
           currentView !== "library" &&
           currentView !== "profile" &&
+          currentView !== "documents" &&
           !galleryOpen && (
             <footer className="input-area">
               <div className="attachment-wrapper">
