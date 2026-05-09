@@ -83,6 +83,11 @@ export default function App() {
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [imageMode, setImageMode] = useState(false);
 
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [galleryLoading, setGalleryLoading] = useState(false);
+  const [visiblePromptId, setVisiblePromptId] = useState(null);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
 
@@ -704,6 +709,71 @@ ${chatText}`;
       setLoading(false);
     }
   };
+
+  const loadGallery = async () => {
+  try {
+    const authConfig = await getAuthHeaders();
+
+    setGalleryLoading(true);
+
+    const res = await axios.get(`${API_URL}/api/gallery`, authConfig);
+
+    if (res.data.success) {
+      setGalleryImages(res.data.images || []);
+    }
+  } catch (error) {
+    console.error("Load gallery error:", error);
+    alert("Failed to load gallery. Check backend.");
+  } finally {
+    setGalleryLoading(false);
+  }
+};
+
+const openGallery = async () => {
+  setGalleryOpen(true);
+  setSidebarOpen(false);
+  setVisiblePromptId(null);
+  await loadGallery();
+};
+
+const saveImageToGallery = async (prompt, imageUrl) => {
+  try {
+    const authConfig = await getAuthHeaders();
+
+    const res = await axios.post(
+      `${API_URL}/api/gallery/save`,
+      {
+        prompt,
+        imageUrl,
+      },
+      authConfig
+    );
+
+    if (res.data.success) {
+      alert("Image saved to gallery ✅");
+      await loadGallery();
+    }
+  } catch (error) {
+    console.error("Save image error:", error);
+    alert("Failed to save image. Check backend.");
+  }
+};
+
+const deleteGalleryImage = async (id) => {
+  const confirmDelete = window.confirm("Delete this saved image?");
+  if (!confirmDelete) return;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    await axios.delete(`${API_URL}/api/gallery/${id}`, authConfig);
+
+    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+  } catch (error) {
+    console.error("Delete gallery image error:", error);
+    alert("Failed to delete image. Check backend.");
+  }
+};
 
   const speakText = (text, afterSpeak = null) => {
     if (!voiceOutput) {
@@ -1327,6 +1397,22 @@ if (!user && showAuth) {
           </button>
         </div>
 
+        <div className="gallery-box">
+  <p>Image Gallery</p>
+
+  <button onClick={openGallery}>
+    Open Saved Gallery
+  </button>
+</div>
+
+<div className="gallery-box">
+  <p>Image Gallery</p>
+
+  <button onClick={openGallery}>
+    Open Saved Gallery
+  </button>
+</div>
+
         <div className="history">
           <p>Recent Chats</p>
 
@@ -1397,52 +1483,124 @@ if (!user && showAuth) {
   ))}
 </div>
 
-        <section className="messages">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`message ${msg.role === "user" ? "user" : "ai"}`}
-            >
-              <strong>{msg.role === "user" ? "You" : assistantName}</strong>
-              <p>{msg.text}</p>
+         <section className="messages">
+  {galleryOpen ? (
+    <div className="main-gallery-view">
+      <div className="main-gallery-header">
+        <div>
+          <h2>Saved Image Gallery</h2>
+          <p>Your generated images are saved here.</p>
+        </div>
 
-             {msg.role === "ai_image" && msg.imageUrl && (
-  <div className="generated-image-box">
-    <a
-      href={msg.imageUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="generated-image-link"
-    >
-      <img
-        src={msg.imageUrl}
-        alt={msg.text}
-        loading="lazy"
-        referrerPolicy="no-referrer"
-      />
-    </a>
+        <button
+          onClick={() => {
+            setGalleryOpen(false);
+            setVisiblePromptId(null);
+          }}
+        >
+          Back to Chat
+        </button>
+      </div>
 
-    <div className="image-actions">
-      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
-        Open Image
-      </a>
+      {galleryLoading ? (
+        <div className="gallery-empty-main">Loading gallery...</div>
+      ) : galleryImages.length === 0 ? (
+        <div className="gallery-empty-main">No saved images yet.</div>
+      ) : (
+        <div className="main-gallery-grid">
+          {galleryImages.map((img) => (
+            <div className="main-gallery-card" key={img.id}>
+              <img src={img.image_url} alt={img.prompt} />
 
-      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
-        Download
-      </a>
-    </div>
-  </div>
-)}
+              <div className="main-gallery-actions">
+                <a href={img.image_url} target="_blank" rel="noreferrer">
+                  Open
+                </a>
+
+                <button
+                  onClick={() =>
+                    setVisiblePromptId(
+                      visiblePromptId === img.id ? null : img.id
+                    )
+                  }
+                >
+                  Prompt
+                </button>
+
+                <button
+                  className="delete-gallery-btn"
+                  onClick={() => deleteGalleryImage(img.id)}
+                >
+                  Delete
+                </button>
+              </div>
+
+              {visiblePromptId === img.id && (
+                <div className="gallery-prompt-box">
+                  {img.prompt}
+                </div>
+              )}
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  ) : (
+    <>
+      {messages.map((msg, index) => (
+        <div
+          key={index}
+          className={`message ${msg.role === "user" ? "user" : "ai"}`}
+        >
+          <strong>{msg.role === "user" ? "You" : assistantName}</strong>
+          <p>{msg.text}</p>
 
-          {loading && (
-            <div className="message ai">
-              <strong>{assistantName}</strong>
-              <p>Thinking...</p>
+          {msg.role === "ai_image" && msg.imageUrl && (
+            <div className="generated-image-box">
+              <a
+                href={msg.imageUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="generated-image-link"
+              >
+                <img
+                  src={msg.imageUrl}
+                  alt={msg.text}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </a>
+
+              <div className="image-actions">
+                <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+                  Open Image
+                </a>
+
+                <button
+                  onClick={() =>
+                    saveImageToGallery(
+                      msg.text.replace("Generated image for: ", ""),
+                      msg.imageUrl
+                    )
+                  }
+                >
+                  Save Image
+                </button>
+              </div>
             </div>
           )}
-        </section>
+        </div>
+      ))}
+
+      {loading && (
+        <div className="message ai">
+          <strong>{assistantName}</strong>
+          <p>Thinking...</p>
+        </div>
+      )}
+    </>
+  )}
+</section>
 
         <footer className="input-area">
           <div className="attachment-wrapper">

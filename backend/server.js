@@ -8,6 +8,7 @@ import sessionsRoute from "./routes/sessions.js";
 import memoryRoute from "./routes/memory.js";
 import filesRoute from "./routes/files.js";
 import imageRoute from "./routes/image.js";
+import galleryRoute from "./routes/gallery.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use("/api/sessions", sessionsRoute);
 app.use("/api/memory", memoryRoute);
 app.use("/api/files", filesRoute);
 app.use("/api/image", imageRoute);
+app.use("/api/gallery", galleryRoute);
 
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
