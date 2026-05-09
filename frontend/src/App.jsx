@@ -83,6 +83,7 @@ export default function App() {
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [imageMode, setImageMode] = useState(false);
   const [visibleEnhancedPromptId, setVisibleEnhancedPromptId] = useState(null);
+  const [creatorMode, setCreatorMode] = useState(false);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
@@ -91,7 +92,12 @@ export default function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
-
+  const [currentView, setCurrentView] = useState("dashboard");
+ 
+  const [stats, setStats] = useState({
+    totalChats: 0,
+    savedImages: 0,
+  });
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -107,11 +113,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (userId) {
-      loadSettings();
-      loadSessions();
-    }
-  }, [userId]);
+  if (userId) {
+    loadSettings();
+    loadSessions();
+    loadGallery();
+    setCurrentView("dashboard");
+  }
+}, [userId]);
 
   const checkUser = async () => {
     const { data } = await supabase.auth.getSession();
@@ -183,6 +191,7 @@ export default function App() {
     setFileMode(false);
     setUploadedFileName("");
     setImageMode(false);
+    setCreatorMode(false);
     setSidebarOpen(false);
 
     setMessages([
@@ -229,12 +238,18 @@ export default function App() {
       const res = await axios.get(`${API_URL}/api/sessions`, authConfig);
 
       if (res.data.success) {
-        setSessions(res.data.sessions || []);
+  const loadedSessions = res.data.sessions || [];
 
-        if (res.data.sessions?.length > 0 && !activeSessionId) {
-          setActiveSessionId(res.data.sessions[0].id);
-        }
-      }
+  setSessions(loadedSessions);
+  setStats((prev) => ({
+    ...prev,
+    totalChats: loadedSessions.length,
+  }));
+
+  if (loadedSessions.length > 0 && !activeSessionId) {
+    setActiveSessionId(loadedSessions[0].id);
+  }
+}
     } catch (error) {
       console.error("Load sessions error:", error);
     }
@@ -628,6 +643,39 @@ ${chatText}`;
     }
   };
 
+  const goToChat = () => {
+  setCurrentView("chat");
+  setSidebarOpen(false);
+};
+
+const dashboardNewChat = async () => {
+  setCurrentView("chat");
+  await createNewChat();
+};
+
+const dashboardOpenGallery = async () => {
+  setCurrentView("gallery");
+  setGalleryOpen(true);
+  await loadGallery();
+};
+
+const dashboardGenerateImage = () => {
+  setCurrentView("chat");
+  startImageMode();
+};
+
+const dashboardUploadFile = () => {
+  setCurrentView("chat");
+  setTimeout(() => {
+    openFilePicker();
+  }, 200);
+};
+
+const dashboardCreatorTools = () => {
+  setCurrentView("chat");
+  startCreatorMode();
+};
+
   const openFilePicker = () => {
     setAttachmentMenuOpen(false);
     setImageMode(false);
@@ -647,6 +695,130 @@ ${chatText}`;
       },
     ]);
   };
+
+  const startCreatorMode = () => {
+  setAttachmentMenuOpen(false);
+  setFileMode(false);
+  setImageMode(false);
+  setCreatorMode(true);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "ai",
+      text:
+        "Creator Mode ON. Chatbox me topic likho, main YouTube title, script, thumbnail prompt, description, tags aur shorts idea bana dunga.",
+    },
+  ]);
+};
+
+const exitCreatorMode = () => {
+  setCreatorMode(false);
+  setAttachmentMenuOpen(false);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "ai",
+      text: "Creator Mode OFF. You can continue normal chat.",
+    },
+  ]);
+};
+
+const generateCreatorPackage = async (topic) => {
+  if (!topic || !topic.trim()) return;
+
+  const creatorPrompt = `
+You are a professional YouTube content strategist and script writer.
+
+Create a complete creator package for this topic:
+${topic}
+
+Return in this format:
+
+1. Viral Title Ideas
+- Give 5 strong YouTube title options.
+
+2. Best Hook
+- Write a powerful first 10 seconds hook.
+
+3. Full YouTube Script
+- Intro
+- Main points
+- Examples
+- Smooth transitions
+- Outro
+- Call to action
+
+4. Shorts/Reels Version
+- 30-60 second short video script.
+
+5. Thumbnail Text Ideas
+- Give 5 short high-CTR thumbnail text options.
+
+6. Thumbnail Image Prompt
+- Give a professional AI image prompt for thumbnail generation.
+
+7. Video Description
+- SEO friendly description.
+
+8. Tags
+- Give relevant tags.
+
+9. Pinned Comment
+- Give an engaging pinned comment.
+
+Keep it practical, clear, and creator-friendly.
+Reply in the same language style as the user.
+`;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        text: `Creator topic: ${topic}`,
+      },
+    ]);
+
+    setInput("");
+    setLoading(true);
+
+    const res = await axios.post(
+      `${API_URL}/api/chat`,
+      {
+        message: creatorPrompt,
+        sessionId: activeSessionId,
+      },
+      authConfig
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: res.data.reply,
+      },
+    ]);
+
+    speakText(res.data.reply);
+    await loadSessions();
+  } catch (error) {
+    console.error("Creator tools error:", error);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Creator package failed. Check backend terminal.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const exitImageMode = () => {
     setImageMode(false);
@@ -725,8 +897,14 @@ ${chatText}`;
     const res = await axios.get(`${API_URL}/api/gallery`, authConfig);
 
     if (res.data.success) {
-      setGalleryImages(res.data.images || []);
-    }
+  const images = res.data.images || [];
+
+  setGalleryImages(images);
+  setStats((prev) => ({
+    ...prev,
+    savedImages: images.length,
+  }));
+}
   } catch (error) {
     console.error("Load gallery error:", error);
     alert("Failed to load gallery. Check backend.");
@@ -1056,15 +1234,20 @@ const deleteGalleryImage = async (id) => {
 
     const userMessage = input.trim();
 
-    if (imageMode) {
-      await generateImageFromPrompt(userMessage);
-      return;
-    }
+    if (creatorMode) {
+  await generateCreatorPackage(userMessage);
+  return;
+}
 
-    if (fileMode) {
-      await askUploadedFile(userMessage);
-      return;
-    }
+if (imageMode) {
+  await generateImageFromPrompt(userMessage);
+  return;
+}
+
+if (fileMode) {
+  await askUploadedFile(userMessage);
+  return;
+}
 
     let sessionId = activeSessionId;
 
@@ -1337,6 +1520,10 @@ if (!user && showAuth) {
           </button>
         </div>
 
+        <button className="dashboard-btn" onClick={() => setCurrentView("dashboard")}>
+  Dashboard
+</button>
+
         <button className="new-chat" onClick={createNewChat}>
           + New Chat
         </button>
@@ -1403,14 +1590,6 @@ if (!user && showAuth) {
           </button>
         </div>
 
-        <div className="gallery-box">
-  <p>Image Gallery</p>
-
-  <button onClick={openGallery}>
-    Open Saved Gallery
-  </button>
-</div>
-
 <div className="gallery-box">
   <p>Image Gallery</p>
 
@@ -1473,6 +1652,8 @@ if (!user && showAuth) {
               {liveMode ? "• Live Voice ON" : ""}
               {fileMode ? " • File Q&A ON" : ""}
               {imageMode ? " • Image Mode ON" : ""}
+              {creatorMode ? " • Creator Mode ON" : ""}
+
             </span>
           </div>
         </header>
@@ -1489,8 +1670,101 @@ if (!user && showAuth) {
   ))}
 </div>
 
-         <section className="messages">
-  {galleryOpen ? (
+  <section className="messages">
+  {currentView === "dashboard" ? (
+    <div className="dashboard-view">
+      <div className="dashboard-hero">
+        <div>
+          <p className="dashboard-badge">Welcome back</p>
+          <h2>{assistantName} Dashboard</h2>
+          <p>
+            Your AI workspace for chat, files, voice, images, and creator tools.
+          </p>
+        </div>
+
+        <button onClick={dashboardNewChat}>Start New Chat</button>
+      </div>
+
+      <div className="dashboard-stats">
+        <div className="stat-card">
+          <span>Total Chats</span>
+          <strong>{stats.totalChats}</strong>
+        </div>
+
+        <div className="stat-card">
+          <span>Saved Images</span>
+          <strong>{stats.savedImages}</strong>
+        </div>
+
+        <div className="stat-card">
+          <span>Assistant</span>
+          <strong>{assistantName}</strong>
+        </div>
+
+        <div className="stat-card">
+          <span>Personality</span>
+          <strong>{personality}</strong>
+        </div>
+      </div>
+
+      <div className="quick-actions-section">
+        <h3>Quick Actions</h3>
+
+        <div className="quick-actions-grid">
+          <button onClick={dashboardNewChat}>
+            <span>💬</span>
+            New Chat
+          </button>
+
+          <button onClick={dashboardUploadFile}>
+            <span>📄</span>
+            Upload PDF/TXT
+          </button>
+
+          <button onClick={dashboardGenerateImage}>
+            <span>🎨</span>
+            Generate Image
+          </button>
+
+          <button onClick={dashboardOpenGallery}>
+            <span>🖼️</span>
+            Open Gallery
+          </button>
+
+          <button onClick={dashboardCreatorTools}>
+            <span>🎬</span>
+            Creator Tools
+          </button>
+
+          <button onClick={goToChat}>
+            <span>⚡</span>
+            Continue Chat
+          </button>
+        </div>
+      </div>
+
+      <div className="dashboard-recent">
+        <h3>Recent Chats</h3>
+
+        {sessions.length === 0 ? (
+          <p>No chats yet. Start your first conversation.</p>
+        ) : (
+          sessions.slice(0, 5).map((session) => (
+            <button
+              key={session.id}
+              onClick={() => {
+                setCurrentView("chat");
+                openSession(session.id);
+              }}
+            >
+              {session.pinned ? "📌 " : ""}
+              {session.title}
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  ) : galleryOpen ? (
     <div className="main-gallery-view">
       <div className="main-gallery-header">
         <div>
@@ -1501,6 +1775,7 @@ if (!user && showAuth) {
         <button
           onClick={() => {
             setGalleryOpen(false);
+            setCurrentView("chat");
             setVisiblePromptId(null);
           }}
         >
@@ -1542,9 +1817,7 @@ if (!user && showAuth) {
               </div>
 
               {visiblePromptId === img.id && (
-                <div className="gallery-prompt-box">
-                  {img.prompt}
-                </div>
+                <div className="gallery-prompt-box">{img.prompt}</div>
               )}
             </div>
           ))}
@@ -1562,59 +1835,59 @@ if (!user && showAuth) {
           <p>{msg.text}</p>
 
           {msg.role === "ai_image" && msg.imageUrl && (
-  <div className="generated-image-box">
-    <a
-      href={msg.imageUrl}
-      target="_blank"
-      rel="noreferrer"
-      className="generated-image-link"
-    >
-      <img
-        src={msg.imageUrl}
-        alt={msg.text}
-        loading="lazy"
-        referrerPolicy="no-referrer"
-      />
-    </a>
+            <div className="generated-image-box">
+              <a
+                href={msg.imageUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="generated-image-link"
+              >
+                <img
+                  src={msg.imageUrl}
+                  alt={msg.text}
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </a>
 
-    <div className="image-actions">
-      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
-        Open Image
-      </a>
+              <div className="image-actions">
+                <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+                  Open Image
+                </a>
 
-      <button
-        onClick={() =>
-          saveImageToGallery(
-            msg.enhancedPrompt || msg.originalPrompt || msg.text,
-            msg.imageUrl
-          )
-        }
-      >
-        Save Image
-      </button>
+                <button
+                  onClick={() =>
+                    saveImageToGallery(
+                      msg.enhancedPrompt || msg.originalPrompt || msg.text,
+                      msg.imageUrl
+                    )
+                  }
+                >
+                  Save Image
+                </button>
 
-      <button
-        onClick={() =>
-          setVisibleEnhancedPromptId(
-            visibleEnhancedPromptId === msg.id ? null : msg.id
-          )
-        }
-      >
-        Prompt
-      </button>
-    </div>
+                <button
+                  onClick={() =>
+                    setVisibleEnhancedPromptId(
+                      visibleEnhancedPromptId === msg.id ? null : msg.id
+                    )
+                  }
+                >
+                  Prompt
+                </button>
+              </div>
 
-    {visibleEnhancedPromptId === msg.id && (
-      <div className="enhanced-prompt-box">
-        <strong>Original:</strong>
-        <p>{msg.originalPrompt}</p>
+              {visibleEnhancedPromptId === msg.id && (
+                <div className="enhanced-prompt-box">
+                  <strong>Original:</strong>
+                  <p>{msg.originalPrompt}</p>
 
-        <strong>Enhanced:</strong>
-        <p>{msg.enhancedPrompt}</p>
-      </div>
-    )}
-  </div>
-)}
+                  <strong>Enhanced:</strong>
+                  <p>{msg.enhancedPrompt}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       ))}
 
@@ -1639,12 +1912,24 @@ if (!user && showAuth) {
               +
             </button>
 
+            {currentView !== "dashboard" && (
+  <footer className="input-area">
+    ...
+  </footer>
+)}
+
             {attachmentMenuOpen && (
               <div className="attachment-menu">
                 <button onClick={openFilePicker}>Upload File</button>
 
                 <button onClick={startImageMode}>Generate Image</button>
+                <button onClick={startCreatorMode}>Creator Tools</button>
 
+{creatorMode && (
+  <button className="danger-item" onClick={exitCreatorMode}>
+    Exit Creator Mode
+  </button>
+)}
                 {imageMode && (
                   <button className="danger-item" onClick={exitImageMode}>
                     Exit Image Mode
@@ -1673,12 +1958,14 @@ if (!user && showAuth) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleEnter}
             placeholder={
-              imageMode
-                ? "Describe image to generate..."
-                : fileMode
-                ? `Ask about ${uploadedFileName || "uploaded file"}...`
-                : `Message ${assistantName}...`
-            }
+  creatorMode
+    ? "Enter your YouTube/video topic..."
+    : imageMode
+    ? "Describe image to generate..."
+    : fileMode
+    ? `Ask about ${uploadedFileName || "uploaded file"}...`
+    : `Message ${assistantName}...`
+}
           />
 
           <button
