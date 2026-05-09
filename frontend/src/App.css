@@ -856,3 +856,247 @@ body {
     min-height: 220px;
   }
 }
+
+/* =========================
+   LANDING PAGE
+========================= */
+
+.landing-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(0, 234, 255, 0.2), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.2), transparent 35%),
+    #020617;
+  color: white;
+  overflow-x: hidden;
+}
+
+.landing-nav {
+  height: 74px;
+  padding: 0 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 234, 255, 0.14);
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(14px);
+}
+
+.landing-logo {
+  color: #00eaff;
+  font-weight: 900;
+  letter-spacing: 7px;
+  font-size: 22px;
+}
+
+.landing-login-btn,
+.hero-actions button,
+.cta-section button {
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #00eaff, #38bdf8);
+  color: #020617;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 13px 22px;
+  box-shadow: 0 0 24px rgba(0, 234, 255, 0.22);
+}
+
+.hero-section {
+  min-height: calc(100vh - 74px);
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 40px;
+  align-items: center;
+  padding: 70px 8%;
+}
+
+.hero-content {
+  max-width: 760px;
+}
+
+.hero-badge {
+  display: inline-block;
+  color: #67e8f9;
+  border: 1px solid rgba(0, 234, 255, 0.28);
+  background: rgba(0, 234, 255, 0.08);
+  padding: 9px 14px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.hero-content h1 {
+  margin: 0;
+  font-size: clamp(42px, 6vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -2px;
+}
+
+.hero-content h1 span {
+  color: #00eaff;
+  text-shadow: 0 0 28px rgba(0, 234, 255, 0.35);
+}
+
+.hero-content p {
+  color: #cbd5e1;
+  font-size: 18px;
+  line-height: 1.7;
+  margin: 24px 0;
+  max-width: 680px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hero-actions a {
+  color: #67e8f9;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid rgba(0, 234, 255, 0.25);
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(0, 234, 255, 0.06);
+}
+
+.hero-card {
+  position: relative;
+  padding: 34px;
+  border-radius: 28px;
+  background: rgba(15, 23, 42, 0.74);
+  border: 1px solid rgba(0, 234, 255, 0.24);
+  box-shadow: 0 0 60px rgba(0, 234, 255, 0.12);
+  overflow: hidden;
+}
+
+.hero-card h3 {
+  color: #00eaff;
+  font-size: 24px;
+  margin-top: 0;
+}
+
+.hero-card p {
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(0, 234, 255, 0.12);
+  padding: 12px 0;
+  margin: 0;
+}
+
+.orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  background:
+    radial-gradient(circle, #67e8f9, #0ea5e9 45%, transparent 70%);
+  box-shadow:
+    0 0 40px rgba(0, 234, 255, 0.45),
+    inset 0 0 40px rgba(255, 255, 255, 0.3);
+  animation: pulseOrb 2.2s ease-in-out infinite;
+}
+
+@keyframes pulseOrb {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.features-section {
+  padding: 70px 8%;
+}
+
+.features-section h2,
+.cta-section h2 {
+  text-align: center;
+  font-size: 38px;
+  color: #f8fafc;
+  margin-bottom: 36px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.feature-card {
+  padding: 24px;
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.76);
+  border: 1px solid rgba(0, 234, 255, 0.18);
+}
+
+.feature-card h3 {
+  color: #00eaff;
+  margin-top: 0;
+}
+
+.feature-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.cta-section {
+  margin: 40px 8% 80px;
+  padding: 48px;
+  text-align: center;
+  border-radius: 28px;
+  background: rgba(0, 234, 255, 0.08);
+  border: 1px solid rgba(0, 234, 255, 0.2);
+}
+
+.cta-section p {
+  color: #cbd5e1;
+  margin-bottom: 22px;
+}
+
+.auth-back-btn {
+  width: auto !important;
+  margin: 0 0 14px !important;
+  padding: 8px 12px !important;
+  background: rgba(0, 234, 255, 0.08) !important;
+  border: 1px solid rgba(0, 234, 255, 0.25) !important;
+  color: #67e8f9 !important;
+}
+
+@media (max-width: 900px) {
+  .landing-nav {
+    padding: 0 18px;
+  }
+
+  .landing-logo {
+    font-size: 18px;
+    letter-spacing: 5px;
+  }
+
+  .hero-section {
+    grid-template-columns: 1fr;
+    padding: 48px 20px;
+  }
+
+  .hero-content h1 {
+    font-size: 44px;
+  }
+
+  .hero-content p {
+    font-size: 16px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-section {
+    margin: 30px 20px 60px;
+    padding: 32px 20px;
+  }
+}

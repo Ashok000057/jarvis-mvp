@@ -11,6 +11,7 @@ export default function App() {
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const userId = user?.id;
 
@@ -1039,49 +1040,140 @@ ${chatText}`;
     session.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (!user) {
-    return (
-      <div className="app auth-wrapper">
-        <div className="auth-card">
-          <h1>JARVIS</h1>
-          <p>Login to your AI assistant</p>
+  if (!user && !showAuth) {
+  return (
+    <div className="landing-page">
+      <nav className="landing-nav">
+        <div className="landing-logo">JARVIS</div>
 
-          <input
-            value={authEmail}
-            onChange={(e) => setAuthEmail(e.target.value)}
-            placeholder="Email"
-            type="email"
-          />
+        <button className="landing-login-btn" onClick={() => setShowAuth(true)}>
+          Login / Signup
+        </button>
+      </nav>
 
-          <input
-            value={authPassword}
-            onChange={(e) => setAuthPassword(e.target.value)}
-            placeholder="Password"
-            type="password"
-          />
+      <section className="hero-section">
+        <div className="hero-content">
+          <div className="hero-badge">AI Assistant • Voice • PDF • Images</div>
 
-          <button onClick={handleAuth} disabled={authLoading}>
-            {authLoading
-              ? "Please wait..."
-              : authMode === "login"
-              ? "Login"
-              : "Create Account"}
-          </button>
+          <h1>
+            Your Personal <span>Jarvis AI</span> Assistant
+          </h1>
 
-          <span
-            className="auth-switch"
-            onClick={() =>
-              setAuthMode(authMode === "login" ? "signup" : "login")
-            }
-          >
-            {authMode === "login"
-              ? "New user? Create account"
-              : "Already have account? Login"}
-          </span>
+          <p>
+            Chat, summarize PDF/TXT files, ask questions from documents,
+            generate images, use voice mode, save chats, and customize your own
+            AI assistant name and personality.
+          </p>
+
+          <div className="hero-actions">
+            <button onClick={() => setShowAuth(true)}>Get Started Free</button>
+
+            <a href="#features">Explore Features</a>
+          </div>
         </div>
+
+        <div className="hero-card">
+          <div className="orb"></div>
+          <h3>Jarvis Core Online</h3>
+          <p>Memory Enabled</p>
+          <p>Voice Mode Ready</p>
+          <p>File Q&A Active</p>
+          <p>Image Generation Ready</p>
+        </div>
+      </section>
+
+      <section id="features" className="features-section">
+        <h2>What You Can Do</h2>
+
+        <div className="features-grid">
+          <div className="feature-card">
+            <h3>AI Chat</h3>
+            <p>Talk with your customizable personal assistant.</p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Smart Memory</h3>
+            <p>Save chats, recent conversations, and assistant settings.</p>
+          </div>
+
+          <div className="feature-card">
+            <h3>PDF/TXT Summary</h3>
+            <p>Upload files and get summaries instantly.</p>
+          </div>
+
+          <div className="feature-card">
+            <h3>File Q&A</h3>
+            <p>Ask questions directly from uploaded documents.</p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Voice Mode</h3>
+            <p>Speak to Jarvis and listen to AI replies.</p>
+          </div>
+
+          <div className="feature-card">
+            <h3>Image Generator</h3>
+            <p>Create images from prompts inside the chatbox.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="cta-section">
+        <h2>Build, Learn, Create — Faster</h2>
+        <p>Start using your AI assistant now.</p>
+        <button onClick={() => setShowAuth(true)}>Start Free</button>
+      </section>
+    </div>
+  );
+}
+
+if (!user && showAuth) {
+  return (
+    <div className="app auth-wrapper">
+      <div className="auth-card">
+        <button className="auth-back-btn" onClick={() => setShowAuth(false)}>
+          ← Back
+        </button>
+
+        <h1>JARVIS</h1>
+        <p>Login to your AI assistant</p>
+
+        <input
+          value={authEmail}
+          onChange={(e) => setAuthEmail(e.target.value)}
+          placeholder="Email"
+          type="email"
+        />
+
+        <input
+          value={authPassword}
+          onChange={(e) => setAuthPassword(e.target.value)}
+          placeholder="Password"
+          type="password"
+        />
+
+        <button onClick={handleAuth} disabled={authLoading}>
+          {authLoading
+            ? "Please wait..."
+            : authMode === "login"
+            ? "Login"
+            : "Create Account"}
+        </button>
+
+        <span
+          className="auth-switch"
+          onClick={() =>
+            setAuthMode(authMode === "login" ? "signup" : "login")
+          }
+        >
+          {authMode === "login"
+            ? "New user? Create account"
+            : "Already have account? Login"}
+        </span>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="app">
