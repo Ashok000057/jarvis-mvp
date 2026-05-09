@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { supabase } from "./supabaseClient";
 import "./App.css";
@@ -37,6 +37,11 @@ export default function App() {
 
   const [fileMode, setFileMode] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     checkUser();
@@ -126,6 +131,7 @@ export default function App() {
     setActiveSessionId(null);
     setFileMode(false);
     setUploadedFileName("");
+    setSidebarOpen(false);
     setMessages([
       {
         role: "ai",
@@ -198,6 +204,7 @@ export default function App() {
 
         setActiveSessionId(newSession.id);
         setSessions((prev) => [newSession, ...prev]);
+        setSidebarOpen(false);
 
         setMessages([
           {
@@ -219,6 +226,7 @@ export default function App() {
       const authConfig = await getAuthHeaders();
 
       setActiveSessionId(sessionId);
+      setSidebarOpen(false);
 
       const res = await axios.get(
         `${API_URL}/api/sessions/${sessionId}/messages`,
@@ -413,6 +421,8 @@ ${chatText}`;
       return;
     }
 
+    setAttachmentMenuOpen(false);
+
     try {
       const authConfig = await getAuthHeaders();
 
@@ -537,6 +547,7 @@ ${chatText}`;
 
       setFileMode(false);
       setUploadedFileName("");
+      setAttachmentMenuOpen(false);
 
       setMessages((prev) => [
         ...prev,
@@ -549,6 +560,11 @@ ${chatText}`;
       console.error("Clear uploaded file error:", error);
       alert("Failed to clear uploaded file context.");
     }
+  };
+
+  const openFilePicker = () => {
+    setAttachmentMenuOpen(false);
+    fileInputRef.current?.click();
   };
 
   const speakText = (text, afterSpeak = null) => {
@@ -966,10 +982,34 @@ ${chatText}`;
     );
   }
 
-  return (
-    <div className="app">
-      <aside className="sidebar">
-        <h2>{assistantName.toUpperCase()}</h2>
+ return (
+  <div className="app">
+    <button
+      className={`sidebar-toggle ${sidebarOpen ? "hide-toggle" : ""}`}
+      onClick={() => setSidebarOpen(true)}
+      aria-label="Open sidebar"
+    >
+      ☰
+    </button>
+
+    {sidebarOpen && (
+      <div
+        className="sidebar-backdrop"
+        onClick={() => setSidebarOpen(false)}
+      />
+    )}
+
+    <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="sidebar-header">
+          <h2>{assistantName.toUpperCase()}</h2>
+          <button
+            className="sidebar-close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            ×
+          </button>
+        </div>
 
         <button className="new-chat" onClick={createNewChat}>
           + New Chat
@@ -1035,30 +1075,6 @@ ${chatText}`;
           <button className="danger-memory" onClick={clearAllMemory}>
             Clear All Memory
           </button>
-        </div>
-
-        <div className="file-box">
-          <p>File Tools</p>
-
-          <label className="file-upload-btn">
-            Upload TXT/PDF & Summarize
-            <input
-              type="file"
-              accept=".txt,.pdf"
-              onChange={summarizeTextFile}
-              hidden
-            />
-          </label>
-
-          {fileMode && (
-            <button className="file-clear-btn" onClick={clearUploadedFile}>
-              Clear File Q&A
-            </button>
-          )}
-
-          {fileMode && uploadedFileName && (
-            <small className="file-status">Active: {uploadedFileName}</small>
-          )}
         </div>
 
         <div className="history">
@@ -1138,6 +1154,37 @@ ${chatText}`;
         </section>
 
         <footer className="input-area">
+          <div className="attachment-wrapper">
+            <button
+              className="plus-btn"
+              onClick={() => setAttachmentMenuOpen((prev) => !prev)}
+              disabled={loading}
+              aria-label="Open attachments menu"
+            >
+              +
+            </button>
+
+            {attachmentMenuOpen && (
+              <div className="attachment-menu">
+                <button onClick={openFilePicker}>Upload File</button>
+
+                {fileMode && (
+                  <button className="danger-item" onClick={clearUploadedFile}>
+                    Clear File Q&A
+                  </button>
+                )}
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.pdf"
+              onChange={summarizeTextFile}
+              hidden
+            />
+          </div>
+
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
