@@ -138,11 +138,12 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
   const [currentView, setCurrentView] = useState("dashboard");
+
   const [creatorPanelOpen, setCreatorPanelOpen] = useState(false);
   const [creatorTopic, setCreatorTopic] = useState("");
   const [creatorTool, setCreatorTool] = useState("full_package");
-  
-  const [libraryOpen, setLibraryOpen] = useState(false); 
+
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [savedOutputs, setSavedOutputs] = useState([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
   const [visibleOutputId, setVisibleOutputId] = useState(null);
@@ -151,6 +152,7 @@ export default function App() {
     totalChats: 0,
     savedImages: 0,
   });
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -166,13 +168,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-  if (userId) {
-    loadSettings();
-    loadSessions();
-    loadGallery();
-    setCurrentView("dashboard");
-  }
-}, [userId]);
+    if (userId) {
+      loadSettings();
+      loadSessions();
+      loadGallery();
+      setCurrentView("dashboard");
+    }
+  }, [userId]);
 
   const checkUser = async () => {
     const { data } = await supabase.auth.getSession();
@@ -245,6 +247,9 @@ export default function App() {
     setUploadedFileName("");
     setImageMode(false);
     setCreatorMode(false);
+    setGalleryOpen(false);
+    setLibraryOpen(false);
+    setCurrentView("dashboard");
     setSidebarOpen(false);
 
     setMessages([
@@ -291,18 +296,18 @@ export default function App() {
       const res = await axios.get(`${API_URL}/api/sessions`, authConfig);
 
       if (res.data.success) {
-  const loadedSessions = res.data.sessions || [];
+        const loadedSessions = res.data.sessions || [];
 
-  setSessions(loadedSessions);
-  setStats((prev) => ({
-    ...prev,
-    totalChats: loadedSessions.length,
-  }));
+        setSessions(loadedSessions);
+        setStats((prev) => ({
+          ...prev,
+          totalChats: loadedSessions.length,
+        }));
 
-  if (loadedSessions.length > 0 && !activeSessionId) {
-    setActiveSessionId(loadedSessions[0].id);
-  }
-}
+        if (loadedSessions.length > 0 && !activeSessionId) {
+          setActiveSessionId(loadedSessions[0].id);
+        }
+      }
     } catch (error) {
       console.error("Load sessions error:", error);
     }
@@ -329,6 +334,10 @@ export default function App() {
         setFileMode(false);
         setUploadedFileName("");
         setImageMode(false);
+        setCreatorMode(false);
+        setGalleryOpen(false);
+        setLibraryOpen(false);
+        setCurrentView("chat");
 
         setMessages([
           {
@@ -352,6 +361,9 @@ export default function App() {
       setActiveSessionId(sessionId);
       setSidebarOpen(false);
       setImageMode(false);
+      setGalleryOpen(false);
+      setLibraryOpen(false);
+      setCurrentView("chat");
 
       const res = await axios.get(
         `${API_URL}/api/sessions/${sessionId}/messages`,
@@ -429,6 +441,9 @@ export default function App() {
         setFileMode(false);
         setUploadedFileName("");
         setImageMode(false);
+        setCreatorMode(false);
+        setGalleryOpen(false);
+        setLibraryOpen(false);
 
         setMessages([
           {
@@ -491,6 +506,10 @@ export default function App() {
       setFileMode(false);
       setUploadedFileName("");
       setImageMode(false);
+      setCreatorMode(false);
+      setGalleryOpen(false);
+      setLibraryOpen(false);
+      setCurrentView("chat");
 
       setMessages([
         {
@@ -556,6 +575,8 @@ ${chatText}`;
 
     setAttachmentMenuOpen(false);
     setImageMode(false);
+    setCreatorMode(false);
+    setCurrentView("chat");
 
     try {
       const authConfig = await getAuthHeaders();
@@ -697,65 +718,68 @@ ${chatText}`;
   };
 
   const goToChat = () => {
-  setCurrentView("chat");
-  setSidebarOpen(false);
-};
+    setCurrentView("chat");
+    setSidebarOpen(false);
+  };
 
-const dashboardNewChat = async () => {
-  setCurrentView("chat");
-  await createNewChat();
-};
+  const dashboardNewChat = async () => {
+    setCurrentView("chat");
+    await createNewChat();
+  };
 
-const dashboardOpenGallery = async () => {
-  setCurrentView("gallery");
-  setGalleryOpen(true);
-  await loadGallery();
-};
+  const dashboardOpenGallery = async () => {
+    setCurrentView("gallery");
+    setGalleryOpen(true);
+    setLibraryOpen(false);
+    await loadGallery();
+  };
 
-const dashboardGenerateImage = () => {
-  setCurrentView("chat");
-  startImageMode();
-};
+  const dashboardGenerateImage = () => {
+    setCurrentView("chat");
+    startImageMode();
+  };
 
-const dashboardUploadFile = () => {
-  setCurrentView("chat");
-  setTimeout(() => {
-    openFilePicker();
-  }, 200);
-};
+  const dashboardUploadFile = () => {
+    setCurrentView("chat");
+    setTimeout(() => {
+      openFilePicker();
+    }, 200);
+  };
 
-const dashboardCreatorTools = () => {
-  setCurrentView("chat");
-  startCreatorMode();
-};
+  const dashboardCreatorTools = () => {
+    setCurrentView("chat");
+    openCreatorPanel();
+  };
 
   const openFilePicker = () => {
     setAttachmentMenuOpen(false);
     setImageMode(false);
+    setCreatorMode(false);
     fileInputRef.current?.click();
   };
 
   const openCreatorPanel = () => {
-  setAttachmentMenuOpen(false);
-  setCreatorPanelOpen(true);
-};
+    setAttachmentMenuOpen(false);
+    setCurrentView("chat");
+    setCreatorPanelOpen(true);
+  };
 
-const closeCreatorPanel = () => {
-  setCreatorPanelOpen(false);
-  setCreatorTopic("");
-};
+  const closeCreatorPanel = () => {
+    setCreatorPanelOpen(false);
+    setCreatorTopic("");
+  };
 
-const generateCreatorContent = async () => {
-  if (!creatorTopic.trim()) {
-    alert("Topic required");
-    return;
-  }
+  const generateCreatorContent = async () => {
+    if (!creatorTopic.trim()) {
+      alert("Topic required");
+      return;
+    }
 
-  const selectedTool =
-    CREATOR_TOOLS.find((tool) => tool.id === creatorTool) ||
-    CREATOR_TOOLS[0];
+    const selectedTool =
+      CREATOR_TOOLS.find((tool) => tool.id === creatorTool) ||
+      CREATOR_TOOLS[0];
 
-  const creatorPrompt = `
+    const creatorPrompt = `
 You are a professional content creator, YouTube strategist, script writer and social media expert.
 
 Task:
@@ -773,79 +797,81 @@ Rules:
 - Add examples where helpful.
 `;
 
-  let sessionId = activeSessionId;
+    let sessionId = activeSessionId;
 
-  try {
-    const authConfig = await getAuthHeaders();
+    try {
+      const authConfig = await getAuthHeaders();
 
-    if (!sessionId) {
-      const sessionRes = await axios.post(
-        `${API_URL}/api/sessions`,
+      if (!sessionId) {
+        const sessionRes = await axios.post(
+          `${API_URL}/api/sessions`,
+          {
+            title:
+              creatorTopic.length > 32
+                ? creatorTopic.slice(0, 32) + "..."
+                : creatorTopic,
+          },
+          authConfig
+        );
+
+        if (sessionRes.data.success) {
+          sessionId = sessionRes.data.session.id;
+          setActiveSessionId(sessionId);
+          setSessions((prev) => [sessionRes.data.session, ...prev]);
+        }
+      }
+
+      setMessages((prev) => [
+        ...prev,
         {
-          title:
-            creatorTopic.length > 32
-              ? creatorTopic.slice(0, 32) + "..."
-              : creatorTopic,
+          role: "user",
+          text: `${selectedTool.title}: ${creatorTopic}`,
+        },
+      ]);
+
+      setCreatorPanelOpen(false);
+      setLoading(true);
+
+      const res = await axios.post(
+        `${API_URL}/api/chat`,
+        {
+          message: creatorPrompt,
+          sessionId,
         },
         authConfig
       );
 
-      if (sessionRes.data.success) {
-        sessionId = sessionRes.data.session.id;
-        setActiveSessionId(sessionId);
-        setSessions((prev) => [sessionRes.data.session, ...prev]);
-      }
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: res.data.reply,
+        },
+      ]);
+
+      speakText(res.data.reply);
+      await loadSessions();
+    } catch (error) {
+      console.error("Creator tools error:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Creator tools failed. Check backend terminal.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        text: `${selectedTool.title}: ${creatorTopic}`,
-      },
-    ]);
-
-    setCreatorPanelOpen(false);
-    setLoading(true);
-
-    const res = await axios.post(
-      `${API_URL}/api/chat`,
-      {
-        message: creatorPrompt,
-        sessionId,
-      },
-      authConfig
-    );
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "ai",
-        text: res.data.reply,
-      },
-    ]);
-
-    speakText(res.data.reply);
-    await loadSessions();
-  } catch (error) {
-    console.error("Creator tools error:", error);
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "ai",
-        text: "Creator tools failed. Check backend terminal.",
-      },
-    ]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const startImageMode = () => {
     setAttachmentMenuOpen(false);
     setFileMode(false);
+    setCreatorMode(false);
     setImageMode(true);
+    setCurrentView("chat");
 
     setMessages((prev) => [
       ...prev,
@@ -857,38 +883,39 @@ Rules:
   };
 
   const startCreatorMode = () => {
-  setAttachmentMenuOpen(false);
-  setFileMode(false);
-  setImageMode(false);
-  setCreatorMode(true);
+    setAttachmentMenuOpen(false);
+    setFileMode(false);
+    setImageMode(false);
+    setCreatorMode(true);
+    setCurrentView("chat");
 
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "ai",
-      text:
-        "Creator Mode ON. Chatbox me topic likho, main YouTube title, script, thumbnail prompt, description, tags aur shorts idea bana dunga.",
-    },
-  ]);
-};
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text:
+          "Creator Mode ON. Chatbox me topic likho, main YouTube title, script, thumbnail prompt, description, tags aur shorts idea bana dunga.",
+      },
+    ]);
+  };
 
-const exitCreatorMode = () => {
-  setCreatorMode(false);
-  setAttachmentMenuOpen(false);
+  const exitCreatorMode = () => {
+    setCreatorMode(false);
+    setAttachmentMenuOpen(false);
 
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "ai",
-      text: "Creator Mode OFF. You can continue normal chat.",
-    },
-  ]);
-};
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Creator Mode OFF. You can continue normal chat.",
+      },
+    ]);
+  };
 
-const generateCreatorPackage = async (topic) => {
-  if (!topic || !topic.trim()) return;
+  const generateCreatorPackage = async (topic) => {
+    if (!topic || !topic.trim()) return;
 
-  const creatorPrompt = `
+    const creatorPrompt = `
 You are a professional YouTube content strategist and script writer.
 
 Create a complete creator package for this topic:
@@ -932,53 +959,53 @@ Keep it practical, clear, and creator-friendly.
 Reply in the same language style as the user.
 `;
 
-  try {
-    const authConfig = await getAuthHeaders();
+    try {
+      const authConfig = await getAuthHeaders();
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        text: `Creator topic: ${topic}`,
-      },
-    ]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          text: `Creator topic: ${topic}`,
+        },
+      ]);
 
-    setInput("");
-    setLoading(true);
+      setInput("");
+      setLoading(true);
 
-    const res = await axios.post(
-      `${API_URL}/api/chat`,
-      {
-        message: creatorPrompt,
-        sessionId: activeSessionId,
-      },
-      authConfig
-    );
+      const res = await axios.post(
+        `${API_URL}/api/chat`,
+        {
+          message: creatorPrompt,
+          sessionId: activeSessionId,
+        },
+        authConfig
+      );
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "ai",
-        text: res.data.reply,
-      },
-    ]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: res.data.reply,
+        },
+      ]);
 
-    speakText(res.data.reply);
-    await loadSessions();
-  } catch (error) {
-    console.error("Creator tools error:", error);
+      speakText(res.data.reply);
+      await loadSessions();
+    } catch (error) {
+      console.error("Creator tools error:", error);
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "ai",
-        text: "Creator package failed. Check backend terminal.",
-      },
-    ]);
-  } finally {
-    setLoading(false);
-  }
-};
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Creator package failed. Check backend terminal.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const exitImageMode = () => {
     setImageMode(false);
@@ -994,216 +1021,222 @@ Reply in the same language style as the user.
   };
 
   const loadContentLibrary = async () => {
-  try {
-    const authConfig = await getAuthHeaders();
+    try {
+      const authConfig = await getAuthHeaders();
 
-    setLibraryLoading(true);
+      setLibraryLoading(true);
 
-    const res = await axios.get(`${API_URL}/api/outputs`, authConfig);
+      const res = await axios.get(`${API_URL}/api/outputs`, authConfig);
 
-    if (res.data.success) {
-      setSavedOutputs(res.data.outputs || []);
+      if (res.data.success) {
+        setSavedOutputs(res.data.outputs || []);
+      }
+    } catch (error) {
+      console.error("Load content library error:", error);
+      alert("Failed to load content library.");
+    } finally {
+      setLibraryLoading(false);
     }
-  } catch (error) {
-    console.error("Load content library error:", error);
-    alert("Failed to load content library.");
-  } finally {
-    setLibraryLoading(false);
-  }
-};
+  };
 
-const openContentLibrary = async () => {
-  setCurrentView("library");
-  setLibraryOpen(true);
-  setGalleryOpen(false);
-  setSidebarOpen(false);
-  setVisibleOutputId(null);
-  await loadContentLibrary();
-};
+  const openContentLibrary = async () => {
+    setCurrentView("library");
+    setLibraryOpen(true);
+    setGalleryOpen(false);
+    setSidebarOpen(false);
+    setVisibleOutputId(null);
+    await loadContentLibrary();
+  };
 
-const saveOutputToLibrary = async (content, type = "general") => {
-  if (!content || !content.trim()) {
-    alert("Nothing to save");
-    return;
-  }
-
-  const titleInput = window.prompt("Save title:", type + " output");
-
-  if (!titleInput || !titleInput.trim()) return;
-
-  try {
-    const authConfig = await getAuthHeaders();
-
-    const res = await axios.post(
-      `${API_URL}/api/outputs/save`,
-      {
-        title: titleInput.trim(),
-        content,
-        type,
-      },
-      authConfig
-    );
-
-    if (res.data.success) {
-      alert("Saved to Content Library ✅");
-      await loadContentLibrary();
+  const saveOutputToLibrary = async (content, type = "general") => {
+    if (!content || !content.trim()) {
+      alert("Nothing to save");
+      return;
     }
-  } catch (error) {
-    console.error("Save output error:", error);
-    alert("Failed to save output.");
-  }
-};
 
-const deleteSavedOutput = async (id) => {
-  const confirmDelete = window.confirm("Delete this saved output?");
-  if (!confirmDelete) return;
+    const titleInput = window.prompt("Save title:", type + " output");
 
-  try {
-    const authConfig = await getAuthHeaders();
+    if (!titleInput || !titleInput.trim()) return;
 
-    await axios.delete(`${API_URL}/api/outputs/${id}`, authConfig);
+    try {
+      const authConfig = await getAuthHeaders();
 
-    setSavedOutputs((prev) => prev.filter((item) => item.id !== id));
-  } catch (error) {
-    console.error("Delete saved output error:", error);
-    alert("Failed to delete saved output.");
-  }
-};
+      const res = await axios.post(
+        `${API_URL}/api/outputs/save`,
+        {
+          title: titleInput.trim(),
+          content,
+          type,
+        },
+        authConfig
+      );
 
-const copySavedOutput = async (content) => {
-  try {
-    await navigator.clipboard.writeText(content);
-    alert("Copied ✅");
-  } catch (error) {
-    alert("Copy failed");
-  }
-};
+      if (res.data.success) {
+        alert("Saved to Content Library ✅");
+        await loadContentLibrary();
+      }
+    } catch (error) {
+      console.error("Save output error:", error);
+      alert("Failed to save output.");
+    }
+  };
+
+  const deleteSavedOutput = async (id) => {
+    const confirmDelete = window.confirm("Delete this saved output?");
+    if (!confirmDelete) return;
+
+    try {
+      const authConfig = await getAuthHeaders();
+
+      await axios.delete(`${API_URL}/api/outputs/${id}`, authConfig);
+
+      setSavedOutputs((prev) => prev.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Delete saved output error:", error);
+      alert("Failed to delete saved output.");
+    }
+  };
+
+  const copySavedOutput = async (content) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      alert("Copied ✅");
+    } catch (error) {
+      alert("Copy failed");
+    }
+  };
 
   const generateImageFromPrompt = async (prompt) => {
-  if (!prompt || !prompt.trim()) return;
+    if (!prompt || !prompt.trim()) return;
 
-  try {
-    const authConfig = await getAuthHeaders();
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "user",
-        text: `Generate image: ${prompt}`,
-      },
-    ]);
-
-    setInput("");
-    setLoading(true);
-
-    const res = await axios.post(
-      `${API_URL}/api/image/generate`,
-      {
-        prompt,
-      },
-      authConfig
-    );
-
-    if (res.data.success) {
-      const imageMessageId = `img-${Date.now()}`;
+    try {
+      const authConfig = await getAuthHeaders();
 
       setMessages((prev) => [
         ...prev,
         {
-          id: imageMessageId,
-          role: "ai_image",
-          text: `Generated image for: ${res.data.originalPrompt || prompt}`,
-          originalPrompt: res.data.originalPrompt || prompt,
-          enhancedPrompt: res.data.enhancedPrompt || res.data.prompt || prompt,
-          imageUrl: res.data.imageUrl,
+          role: "user",
+          text: `Generate image: ${prompt}`,
         },
       ]);
-    }
-  } catch (error) {
-    console.error("Image generation error:", error);
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "ai",
-        text: "Image generation failed. Check backend terminal.",
-      },
-    ]);
-  } finally {
-    setLoading(false);
-  }
-};
+      setInput("");
+      setLoading(true);
+
+      const res = await axios.post(
+        `${API_URL}/api/image/generate`,
+        {
+          prompt,
+        },
+        authConfig
+      );
+
+      if (res.data.success) {
+        const imageMessageId = `img-${Date.now()}`;
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: imageMessageId,
+            role: "ai_image",
+            text: `Generated image for: ${res.data.originalPrompt || prompt}`,
+            originalPrompt: res.data.originalPrompt || prompt,
+            enhancedPrompt: res.data.enhancedPrompt || res.data.prompt || prompt,
+            imageUrl: res.data.imageUrl,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Image generation error:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Image generation failed. Check backend terminal.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadGallery = async () => {
-  try {
-    const authConfig = await getAuthHeaders();
+    try {
+      const authConfig = await getAuthHeaders();
 
-    setGalleryLoading(true);
+      setGalleryLoading(true);
 
-    const res = await axios.get(`${API_URL}/api/gallery`, authConfig);
+      const res = await axios.get(`${API_URL}/api/gallery`, authConfig);
 
-    if (res.data.success) {
-  const images = res.data.images || [];
+      if (res.data.success) {
+        const images = res.data.images || [];
 
-  setGalleryImages(images);
-  setStats((prev) => ({
-    ...prev,
-    savedImages: images.length,
-  }));
-}
-  } catch (error) {
-    console.error("Load gallery error:", error);
-    alert("Failed to load gallery. Check backend.");
-  } finally {
-    setGalleryLoading(false);
-  }
-};
-
-const openGallery = async () => {
-  setGalleryOpen(true);
-  setSidebarOpen(false);
-  setVisiblePromptId(null);
-  await loadGallery();
-};
-
-const saveImageToGallery = async (prompt, imageUrl) => {
-  try {
-    const authConfig = await getAuthHeaders();
-
-    const res = await axios.post(
-      `${API_URL}/api/gallery/save`,
-      {
-        prompt,
-        imageUrl,
-      },
-      authConfig
-    );
-
-    if (res.data.success) {
-      alert("Image saved to gallery ✅");
-      await loadGallery();
+        setGalleryImages(images);
+        setStats((prev) => ({
+          ...prev,
+          savedImages: images.length,
+        }));
+      }
+    } catch (error) {
+      console.error("Load gallery error:", error);
+      alert("Failed to load gallery. Check backend.");
+    } finally {
+      setGalleryLoading(false);
     }
-  } catch (error) {
-    console.error("Save image error:", error);
-    alert("Failed to save image. Check backend.");
-  }
-};
+  };
 
-const deleteGalleryImage = async (id) => {
-  const confirmDelete = window.confirm("Delete this saved image?");
-  if (!confirmDelete) return;
+  const openGallery = async () => {
+    setCurrentView("gallery");
+    setGalleryOpen(true);
+    setLibraryOpen(false);
+    setSidebarOpen(false);
+    setVisiblePromptId(null);
+    await loadGallery();
+  };
 
-  try {
-    const authConfig = await getAuthHeaders();
+  const saveImageToGallery = async (prompt, imageUrl) => {
+    try {
+      const authConfig = await getAuthHeaders();
 
-    await axios.delete(`${API_URL}/api/gallery/${id}`, authConfig);
+      const res = await axios.post(
+        `${API_URL}/api/gallery/save`,
+        {
+          prompt,
+          imageUrl,
+        },
+        authConfig
+      );
 
-    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
-  } catch (error) {
-    console.error("Delete gallery image error:", error);
-    alert("Failed to delete image. Check backend.");
-  }
-};
+      if (res.data.success) {
+        alert("Image saved to gallery ✅");
+        await loadGallery();
+      }
+    } catch (error) {
+      console.error("Save image error:", error);
+      alert("Failed to save image. Check backend.");
+    }
+  };
+
+  const deleteGalleryImage = async (id) => {
+    const confirmDelete = window.confirm("Delete this saved image?");
+    if (!confirmDelete) return;
+
+    try {
+      const authConfig = await getAuthHeaders();
+
+      await axios.delete(`${API_URL}/api/gallery/${id}`, authConfig);
+
+      setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+      setStats((prev) => ({
+        ...prev,
+        savedImages: Math.max(0, prev.savedImages - 1),
+      }));
+    } catch (error) {
+      console.error("Delete gallery image error:", error);
+      alert("Failed to delete image. Check backend.");
+    }
+  };
 
   const speakText = (text, afterSpeak = null) => {
     if (!voiceOutput) {
@@ -1481,19 +1514,19 @@ const deleteGalleryImage = async (id) => {
     const userMessage = input.trim();
 
     if (creatorMode) {
-  await generateCreatorPackage(userMessage);
-  return;
-}
+      await generateCreatorPackage(userMessage);
+      return;
+    }
 
-if (imageMode) {
-  await generateImageFromPrompt(userMessage);
-  return;
-}
+    if (imageMode) {
+      await generateImageFromPrompt(userMessage);
+      return;
+    }
 
-if (fileMode) {
-  await askUploadedFile(userMessage);
-  return;
-}
+    if (fileMode) {
+      await askUploadedFile(userMessage);
+      return;
+    }
 
     let sessionId = activeSessionId;
 
@@ -1579,18 +1612,19 @@ if (fileMode) {
   };
 
   const applyPromptTemplate = (template) => {
-  setImageMode(false);
+    setImageMode(false);
+    setCreatorMode(false);
 
-  setInput(template.prompt);
+    setInput(template.prompt);
 
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "ai",
-      text: `Template selected: ${template.title}. Prompt ko edit karke Send dabao.`,
-    },
-  ]);
-};
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: `Template selected: ${template.title}. Prompt ko edit karke Send dabao.`,
+      },
+    ]);
+  };
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
@@ -1603,139 +1637,139 @@ if (fileMode) {
   );
 
   if (!user && !showAuth) {
-  return (
-    <div className="landing-page">
-      <nav className="landing-nav">
-        <div className="landing-logo">JARVIS</div>
+    return (
+      <div className="landing-page">
+        <nav className="landing-nav">
+          <div className="landing-logo">JARVIS</div>
 
-        <button className="landing-login-btn" onClick={() => setShowAuth(true)}>
-          Login / Signup
-        </button>
-      </nav>
+          <button className="landing-login-btn" onClick={() => setShowAuth(true)}>
+            Login / Signup
+          </button>
+        </nav>
 
-      <section className="hero-section">
-        <div className="hero-content">
-          <div className="hero-badge">AI Assistant • Voice • PDF • Images</div>
+        <section className="hero-section">
+          <div className="hero-content">
+            <div className="hero-badge">AI Assistant • Voice • PDF • Images</div>
 
-          <h1>
-            Your Personal <span>Jarvis AI</span> Assistant
-          </h1>
+            <h1>
+              Your Personal <span>Jarvis AI</span> Assistant
+            </h1>
 
-          <p>
-            Chat, summarize PDF/TXT files, ask questions from documents,
-            generate images, use voice mode, save chats, and customize your own
-            AI assistant name and personality.
-          </p>
+            <p>
+              Chat, summarize PDF/TXT files, ask questions from documents,
+              generate images, use voice mode, save chats, and customize your own
+              AI assistant name and personality.
+            </p>
 
-          <div className="hero-actions">
-            <button onClick={() => setShowAuth(true)}>Get Started Free</button>
+            <div className="hero-actions">
+              <button onClick={() => setShowAuth(true)}>Get Started Free</button>
 
-            <a href="#features">Explore Features</a>
-          </div>
-        </div>
-
-        <div className="hero-card">
-          <div className="orb"></div>
-          <h3>Jarvis Core Online</h3>
-          <p>Memory Enabled</p>
-          <p>Voice Mode Ready</p>
-          <p>File Q&A Active</p>
-          <p>Image Generation Ready</p>
-        </div>
-      </section>
-
-      <section id="features" className="features-section">
-        <h2>What You Can Do</h2>
-
-        <div className="features-grid">
-          <div className="feature-card">
-            <h3>AI Chat</h3>
-            <p>Talk with your customizable personal assistant.</p>
+              <a href="#features">Explore Features</a>
+            </div>
           </div>
 
-          <div className="feature-card">
-            <h3>Smart Memory</h3>
-            <p>Save chats, recent conversations, and assistant settings.</p>
+          <div className="hero-card">
+            <div className="orb"></div>
+            <h3>Jarvis Core Online</h3>
+            <p>Memory Enabled</p>
+            <p>Voice Mode Ready</p>
+            <p>File Q&A Active</p>
+            <p>Image Generation Ready</p>
           </div>
+        </section>
 
-          <div className="feature-card">
-            <h3>PDF/TXT Summary</h3>
-            <p>Upload files and get summaries instantly.</p>
+        <section id="features" className="features-section">
+          <h2>What You Can Do</h2>
+
+          <div className="features-grid">
+            <div className="feature-card">
+              <h3>AI Chat</h3>
+              <p>Talk with your customizable personal assistant.</p>
+            </div>
+
+            <div className="feature-card">
+              <h3>Smart Memory</h3>
+              <p>Save chats, recent conversations, and assistant settings.</p>
+            </div>
+
+            <div className="feature-card">
+              <h3>PDF/TXT Summary</h3>
+              <p>Upload files and get summaries instantly.</p>
+            </div>
+
+            <div className="feature-card">
+              <h3>File Q&A</h3>
+              <p>Ask questions directly from uploaded documents.</p>
+            </div>
+
+            <div className="feature-card">
+              <h3>Voice Mode</h3>
+              <p>Speak to Jarvis and listen to AI replies.</p>
+            </div>
+
+            <div className="feature-card">
+              <h3>Image Generator</h3>
+              <p>Create images from prompts inside the chatbox.</p>
+            </div>
           </div>
+        </section>
 
-          <div className="feature-card">
-            <h3>File Q&A</h3>
-            <p>Ask questions directly from uploaded documents.</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Voice Mode</h3>
-            <p>Speak to Jarvis and listen to AI replies.</p>
-          </div>
-
-          <div className="feature-card">
-            <h3>Image Generator</h3>
-            <p>Create images from prompts inside the chatbox.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="cta-section">
-        <h2>Build, Learn, Create — Faster</h2>
-        <p>Start using your AI assistant now.</p>
-        <button onClick={() => setShowAuth(true)}>Start Free</button>
-      </section>
-    </div>
-  );
-}
-
-if (!user && showAuth) {
-  return (
-    <div className="app auth-wrapper">
-      <div className="auth-card">
-        <button className="auth-back-btn" onClick={() => setShowAuth(false)}>
-          ← Back
-        </button>
-
-        <h1>JARVIS</h1>
-        <p>Login to your AI assistant</p>
-
-        <input
-          value={authEmail}
-          onChange={(e) => setAuthEmail(e.target.value)}
-          placeholder="Email"
-          type="email"
-        />
-
-        <input
-          value={authPassword}
-          onChange={(e) => setAuthPassword(e.target.value)}
-          placeholder="Password"
-          type="password"
-        />
-
-        <button onClick={handleAuth} disabled={authLoading}>
-          {authLoading
-            ? "Please wait..."
-            : authMode === "login"
-            ? "Login"
-            : "Create Account"}
-        </button>
-
-        <span
-          className="auth-switch"
-          onClick={() =>
-            setAuthMode(authMode === "login" ? "signup" : "login")
-          }
-        >
-          {authMode === "login"
-            ? "New user? Create account"
-            : "Already have account? Login"}
-        </span>
+        <section className="cta-section">
+          <h2>Build, Learn, Create — Faster</h2>
+          <p>Start using your AI assistant now.</p>
+          <button onClick={() => setShowAuth(true)}>Start Free</button>
+        </section>
       </div>
-    </div>
-  );
-}
+    );
+  }
+
+  if (!user && showAuth) {
+    return (
+      <div className="app auth-wrapper">
+        <div className="auth-card">
+          <button className="auth-back-btn" onClick={() => setShowAuth(false)}>
+            ← Back
+          </button>
+
+          <h1>JARVIS</h1>
+          <p>Login to your AI assistant</p>
+
+          <input
+            value={authEmail}
+            onChange={(e) => setAuthEmail(e.target.value)}
+            placeholder="Email"
+            type="email"
+          />
+
+          <input
+            value={authPassword}
+            onChange={(e) => setAuthPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+          />
+
+          <button onClick={handleAuth} disabled={authLoading}>
+            {authLoading
+              ? "Please wait..."
+              : authMode === "login"
+              ? "Login"
+              : "Create Account"}
+          </button>
+
+          <span
+            className="auth-switch"
+            onClick={() =>
+              setAuthMode(authMode === "login" ? "signup" : "login")
+            }
+          >
+            {authMode === "login"
+              ? "New user? Create account"
+              : "Already have account? Login"}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -1747,13 +1781,8 @@ if (!user && showAuth) {
         ☰
       </button>
 
-      
-
       {sidebarOpen && (
-        <div
-          className="sidebar-backdrop"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
       )}
 
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
@@ -1769,15 +1798,28 @@ if (!user && showAuth) {
         </div>
 
         <button
-  className="dashboard-btn"
-  onClick={() => {
-    setCurrentView("dashboard");
-    setSidebarOpen(false);
-    setGalleryOpen(false);
-  }}
->
-  Dashboard
-</button>
+          className="dashboard-btn"
+          onClick={() => {
+            setCurrentView("dashboard");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+          }}
+        >
+          Dashboard
+        </button>
+
+        <button
+          className="profile-btn"
+          onClick={() => {
+            setCurrentView("profile");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+          }}
+        >
+          Profile Settings
+        </button>
 
         <button className="new-chat" onClick={createNewChat}>
           + New Chat
@@ -1844,21 +1886,18 @@ if (!user && showAuth) {
             Clear All Memory
           </button>
         </div>
+
         <div className="library-box">
-  <p>Content Library</p>
+          <p>Content Library</p>
 
-  <button onClick={openContentLibrary}>
-    Open Saved Outputs
-  </button>
-</div>
+          <button onClick={openContentLibrary}>Open Saved Outputs</button>
+        </div>
 
-<div className="gallery-box">
-  <p>Image Gallery</p>
+        <div className="gallery-box">
+          <p>Image Gallery</p>
 
-  <button onClick={openGallery}>
-    Open Saved Gallery
-  </button>
-</div>
+          <button onClick={openGallery}>Open Saved Gallery</button>
+        </div>
 
         <div className="history">
           <p>Recent Chats</p>
@@ -1895,9 +1934,7 @@ if (!user && showAuth) {
                     {session.pinned ? "Unpin" : "Pin"}
                   </button>
 
-                  <button onClick={(e) => deleteChat(e, session.id)}>
-                    Del
-                  </button>
+                  <button onClick={(e) => deleteChat(e, session.id)}>Del</button>
                 </div>
               </div>
             ))
@@ -1915,456 +1952,564 @@ if (!user && showAuth) {
               {fileMode ? " • File Q&A ON" : ""}
               {imageMode ? " • Image Mode ON" : ""}
               {creatorMode ? " • Creator Mode ON" : ""}
-
             </span>
           </div>
         </header>
 
-        <div className="prompt-template-bar">
-  {PROMPT_TEMPLATES.map((template) => (
-    <button
-      key={template.title}
-      onClick={() => applyPromptTemplate(template)}
-      disabled={loading}
-    >
-      {template.title}
-    </button>
-  ))}
-</div>
-
-<section className="messages">
-  {creatorPanelOpen && currentView !== "dashboard" && currentView !== "library" && !galleryOpen && (
-    <div className="creator-panel">
-      <div className="creator-panel-header">
-        <div>
-          <h2>Creator Tools</h2>
-          <p>Choose a tool, enter your topic, and generate ready-to-use content.</p>
-        </div>
-
-        <button onClick={closeCreatorPanel}>×</button>
-      </div>
-
-      <div className="creator-tools-grid">
-        {CREATOR_TOOLS.map((tool) => (
-          <button
-            key={tool.id}
-            className={creatorTool === tool.id ? "active-creator-tool" : ""}
-            onClick={() => setCreatorTool(tool.id)}
-          >
-            <span>{tool.icon}</span>
-            {tool.title}
-          </button>
-        ))}
-      </div>
-
-      <div className="creator-topic-box">
-        <label>Topic / Idea</label>
-
-        <textarea
-          value={creatorTopic}
-          onChange={(e) => setCreatorTopic(e.target.value)}
-          placeholder="Example: AI tools for students, how to make money online, best study apps..."
-        />
-
-        <button onClick={generateCreatorContent} disabled={loading}>
-          {loading ? "Generating..." : "Generate Content"}
-        </button>
-      </div>
-    </div>
-  )}
-
-  {currentView === "dashboard" ? (
-    <div className="dashboard-view">
-      <div className="dashboard-hero">
-        <div>
-          <p className="dashboard-badge">Welcome back</p>
-          <h2>{assistantName} Dashboard</h2>
-          <p>
-            Your AI workspace for chat, files, voice, images, and creator tools.
-          </p>
-        </div>
-
-        <button onClick={dashboardNewChat}>Start New Chat</button>
-      </div>
-
-      <div className="dashboard-stats">
-        <div className="stat-card">
-          <span>Total Chats</span>
-          <strong>{stats.totalChats}</strong>
-        </div>
-
-        <div className="stat-card">
-          <span>Saved Images</span>
-          <strong>{stats.savedImages}</strong>
-        </div>
-
-        <div className="stat-card">
-          <span>Assistant</span>
-          <strong>{assistantName}</strong>
-        </div>
-
-        <div className="stat-card">
-          <span>Personality</span>
-          <strong>{personality}</strong>
-        </div>
-      </div>
-
-      <div className="quick-actions-section">
-        <h3>Quick Actions</h3>
-
-        <div className="quick-actions-grid">
-          <button onClick={dashboardNewChat}>
-            <span>💬</span>
-            New Chat
-          </button>
-
-          <button onClick={dashboardUploadFile}>
-            <span>📄</span>
-            Upload PDF/TXT
-          </button>
-
-          <button onClick={dashboardGenerateImage}>
-            <span>🎨</span>
-            Generate Image
-          </button>
-
-          <button onClick={dashboardOpenGallery}>
-            <span>🖼️</span>
-            Open Gallery
-          </button>
-
-          <button onClick={dashboardCreatorTools}>
-            <span>🎬</span>
-            Creator Tools
-          </button>
-
-          <button onClick={goToChat}>
-            <span>⚡</span>
-            Continue Chat
-          </button>
-        </div>
-      </div>
-
-      <div className="dashboard-recent">
-        <h3>Recent Chats</h3>
-
-        {sessions.length === 0 ? (
-          <p>No chats yet. Start your first conversation.</p>
-        ) : (
-          sessions.slice(0, 5).map((session) => (
-            <button
-              key={session.id}
-              onClick={() => {
-                setCurrentView("chat");
-                openSession(session.id);
-              }}
-            >
-              {session.pinned ? "📌 " : ""}
-              {session.title}
-            </button>
-          ))
-        )}
-      </div>
-    </div>
-  ) : currentView === "library" ? (
-    <div className="content-library-view">
-      <div className="content-library-header">
-        <div>
-          <h2>Content Library</h2>
-          <p>Your saved AI outputs are stored here.</p>
-        </div>
-
-        <button
-          onClick={() => {
-            setCurrentView("chat");
-            setLibraryOpen(false);
-            setVisibleOutputId(null);
-          }}
-        >
-          Back to Chat
-        </button>
-      </div>
-
-      {libraryLoading ? (
-        <div className="library-empty">Loading saved outputs...</div>
-      ) : savedOutputs.length === 0 ? (
-        <div className="library-empty">No saved outputs yet.</div>
-      ) : (
-        <div className="library-list">
-          {savedOutputs.map((item) => (
-            <div className="library-card" key={item.id}>
-              <div className="library-card-top">
-                <div>
-                  <h3>{item.title}</h3>
-                  <span>{item.type}</span>
-                </div>
-
-                <small>{new Date(item.created_at).toLocaleDateString()}</small>
-              </div>
-
-              <div className="library-actions">
-                <button
-                  onClick={() =>
-                    setVisibleOutputId(
-                      visibleOutputId === item.id ? null : item.id
-                    )
-                  }
-                >
-                  {visibleOutputId === item.id ? "Hide" : "Open"}
-                </button>
-
-                <button onClick={() => copySavedOutput(item.content)}>
-                  Copy
-                </button>
-
-                <button
-                  className="delete-library-btn"
-                  onClick={() => deleteSavedOutput(item.id)}
-                >
-                  Delete
-                </button>
-              </div>
-
-              {visibleOutputId === item.id && (
-                <div className="library-content">{item.content}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  ) : galleryOpen ? (
-    <div className="main-gallery-view">
-      <div className="main-gallery-header">
-        <div>
-          <h2>Saved Image Gallery</h2>
-          <p>Your generated images are saved here.</p>
-        </div>
-
-        <button
-          onClick={() => {
-            setGalleryOpen(false);
-            setCurrentView("chat");
-            setVisiblePromptId(null);
-          }}
-        >
-          Back to Chat
-        </button>
-      </div>
-
-      {galleryLoading ? (
-        <div className="gallery-empty-main">Loading gallery...</div>
-      ) : galleryImages.length === 0 ? (
-        <div className="gallery-empty-main">No saved images yet.</div>
-      ) : (
-        <div className="main-gallery-grid">
-          {galleryImages.map((img) => (
-            <div className="main-gallery-card" key={img.id}>
-              <img src={img.image_url} alt={img.prompt} />
-
-              <div className="main-gallery-actions">
-                <a href={img.image_url} target="_blank" rel="noreferrer">
-                  Open
-                </a>
-
-                <button
-                  onClick={() =>
-                    setVisiblePromptId(
-                      visiblePromptId === img.id ? null : img.id
-                    )
-                  }
-                >
-                  Prompt
-                </button>
-
-                <button
-                  className="delete-gallery-btn"
-                  onClick={() => deleteGalleryImage(img.id)}
-                >
-                  Delete
-                </button>
-              </div>
-
-              {visiblePromptId === img.id && (
-                <div className="gallery-prompt-box">{img.prompt}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  ) : (
-    <>
-      {messages.map((msg, index) => (
-        <div
-          key={index}
-          className={`message ${msg.role === "user" ? "user" : "ai"}`}
-        >
-          <strong>{msg.role === "user" ? "You" : assistantName}</strong>
-          <p>{msg.text}</p>
-
-          {msg.role === "ai" && (
-            <div className="message-actions">
-              <button onClick={() => saveOutputToLibrary(msg.text, "ai_output")}>
-                Save Output
-              </button>
-
-              <button onClick={() => copySavedOutput(msg.text)}>Copy</button>
-            </div>
-          )}
-
-          {msg.role === "ai_image" && msg.imageUrl && (
-            <div className="generated-image-box">
-              <a
-                href={msg.imageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="generated-image-link"
+        {currentView === "chat" && !galleryOpen && !libraryOpen && (
+          <div className="prompt-template-bar">
+            {PROMPT_TEMPLATES.map((template) => (
+              <button
+                key={template.title}
+                onClick={() => applyPromptTemplate(template)}
+                disabled={loading}
               >
-                <img
-                  src={msg.imageUrl}
-                  alt={msg.text}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
-              </a>
+                {template.title}
+              </button>
+            ))}
+          </div>
+        )}
 
-              <div className="image-actions">
-                <a href={msg.imageUrl} target="_blank" rel="noreferrer">
-                  Open Image
-                </a>
+        <section className="messages">
+          {creatorPanelOpen &&
+            currentView !== "dashboard" &&
+            currentView !== "library" &&
+            currentView !== "profile" &&
+            !galleryOpen && (
+              <div className="creator-panel">
+                <div className="creator-panel-header">
+                  <div>
+                    <h2>Creator Tools</h2>
+                    <p>
+                      Choose a tool, enter your topic, and generate ready-to-use content.
+                    </p>
+                  </div>
 
-                <button
-                  onClick={() =>
-                    saveImageToGallery(
-                      msg.enhancedPrompt || msg.originalPrompt || msg.text,
-                      msg.imageUrl
-                    )
-                  }
-                >
-                  Save Image
-                </button>
-
-                <button
-                  onClick={() =>
-                    setVisibleEnhancedPromptId(
-                      visibleEnhancedPromptId === msg.id ? null : msg.id
-                    )
-                  }
-                >
-                  Prompt
-                </button>
-              </div>
-
-              {visibleEnhancedPromptId === msg.id && (
-                <div className="enhanced-prompt-box">
-                  <strong>Original:</strong>
-                  <p>{msg.originalPrompt}</p>
-
-                  <strong>Enhanced:</strong>
-                  <p>{msg.enhancedPrompt}</p>
+                  <button onClick={closeCreatorPanel}>×</button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
 
-      {loading && (
-        <div className="message ai">
-          <strong>{assistantName}</strong>
-          <p>Thinking...</p>
-        </div>
-      )}
-    </>
-  )}
-</section>
+                <div className="creator-tools-grid">
+                  {CREATOR_TOOLS.map((tool) => (
+                    <button
+                      key={tool.id}
+                      className={creatorTool === tool.id ? "active-creator-tool" : ""}
+                      onClick={() => setCreatorTool(tool.id)}
+                    >
+                      <span>{tool.icon}</span>
+                      {tool.title}
+                    </button>
+                  ))}
+                </div>
 
-        <footer className="input-area">
-          <div className="attachment-wrapper">
-            <button
-              className="plus-btn"
-              onClick={() => setAttachmentMenuOpen((prev) => !prev)}
-              disabled={loading}
-              aria-label="Open attachments menu"
-            >
-              +
-            </button>
+                <div className="creator-topic-box">
+                  <label>Topic / Idea</label>
 
-            {currentView !== "dashboard" &&
-  currentView !== "library" &&
-  !galleryOpen && (
-    <footer className="input-area">
-      {/* tumhara existing input-area content yahin rahega */}
-    </footer>
-  )}
+                  <textarea
+                    value={creatorTopic}
+                    onChange={(e) => setCreatorTopic(e.target.value)}
+                    placeholder="Example: AI tools for students, how to make money online, best study apps..."
+                  />
 
-            {attachmentMenuOpen && (
-              <div className="attachment-menu">
-                <button onClick={openFilePicker}>Upload File</button>
-
-                <button onClick={startImageMode}>Generate Image</button>
-                <button onClick={openCreatorPanel}>Creator Tools</button>
-
-{creatorMode && (
-  <button className="danger-item" onClick={exitCreatorMode}>
-    Exit Creator Mode
-  </button>
-)}
-                {imageMode && (
-                  <button className="danger-item" onClick={exitImageMode}>
-                    Exit Image Mode
+                  <button onClick={generateCreatorContent} disabled={loading}>
+                    {loading ? "Generating..." : "Generate Content"}
                   </button>
-                )}
-
-                {fileMode && (
-                  <button className="danger-item" onClick={clearUploadedFile}>
-                    Clear File Q&A
-                  </button>
-                )}
+                </div>
               </div>
             )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".txt,.pdf"
-              onChange={summarizeTextFile}
-              hidden
-            />
-          </div>
+          {currentView === "profile" ? (
+            <div className="profile-settings-view">
+              <div className="profile-hero">
+                <div>
+                  <p className="profile-badge">Account Settings</p>
+                  <h2>Profile & Assistant Settings</h2>
+                  <p>
+                    Manage your assistant identity, voice behavior, memory controls and account.
+                  </p>
+                </div>
 
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleEnter}
-            placeholder={
-  creatorMode
-    ? "Enter your YouTube/video topic..."
-    : imageMode
-    ? "Describe image to generate..."
-    : fileMode
-    ? `Ask about ${uploadedFileName || "uploaded file"}...`
-    : `Message ${assistantName}...`
-}
-          />
+                <button onClick={() => setCurrentView("chat")}>Back to Chat</button>
+              </div>
 
-          <button
-            className="voice-btn"
-            onClick={startVoiceInput}
-            disabled={loading || listening}
-          >
-            {listening ? "Listening..." : "🎙"}
-          </button>
+              <div className="profile-grid">
+                <div className="profile-card">
+                  <h3>User Profile</h3>
 
-          <button className="voice-btn" onClick={stopVoiceSystem}>
-            🔇
-          </button>
+                  <label>Email</label>
+                  <input value={user?.email || "No email found"} disabled />
 
-          <button onClick={sendMessage} disabled={loading}>
-            Send
-          </button>
-        </footer>
+                  <label>User ID</label>
+                  <input value={user?.id || ""} disabled />
+                </div>
+
+                <div className="profile-card">
+                  <h3>Assistant Identity</h3>
+
+                  <label>Assistant Name</label>
+                  <input
+                    value={assistantName}
+                    onChange={(e) => setAssistantName(e.target.value)}
+                    placeholder="Enter assistant name"
+                  />
+
+                  <label>Personality</label>
+                  <select
+                    value={personality}
+                    onChange={(e) => setPersonality(e.target.value)}
+                  >
+                    <option value="friendly">Friendly</option>
+                    <option value="professional">Professional</option>
+                    <option value="formal">Formal</option>
+                    <option value="sarcastic">Sarcastic</option>
+                  </select>
+
+                  <button onClick={saveSettings} disabled={settingsLoading}>
+                    {settingsLoading ? "Saving..." : "Save Assistant Settings"}
+                  </button>
+                </div>
+
+                <div className="profile-card">
+                  <h3>Voice Settings</h3>
+
+                  <label>Voice Output</label>
+                  <select
+                    value={voiceOutput ? "on" : "off"}
+                    onChange={(e) => setVoiceOutput(e.target.value === "on")}
+                  >
+                    <option value="on">Voice On</option>
+                    <option value="off">Voice Off</option>
+                  </select>
+
+                  <label>Live Voice Mode</label>
+                  <select
+                    value={liveMode ? "on" : "off"}
+                    onChange={(e) => setLiveMode(e.target.value === "on")}
+                  >
+                    <option value="off">Live Mode Off</option>
+                    <option value="on">Live Mode On</option>
+                  </select>
+
+                  <button onClick={stopVoiceSystem}>Stop Voice System</button>
+                </div>
+
+                <div className="profile-card danger-profile-card">
+                  <h3>Privacy & Memory</h3>
+
+                  <p>
+                    Clear your current chat or delete all saved chat memory from your account.
+                  </p>
+
+                  <button onClick={clearCurrentChat}>Clear Current Chat</button>
+
+                  <button className="danger-profile-btn" onClick={clearAllMemory}>
+                    Clear All Memory
+                  </button>
+                </div>
+
+                <div className="profile-card">
+                  <h3>Account</h3>
+
+                  <p>
+                    Logout from this device. Your saved chats, gallery and outputs remain saved.
+                  </p>
+
+                  <button className="logout-profile-btn" onClick={logout}>
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : currentView === "dashboard" ? (
+            <div className="dashboard-view">
+              <div className="dashboard-hero">
+                <div>
+                  <p className="dashboard-badge">Welcome back</p>
+                  <h2>{assistantName} Dashboard</h2>
+                  <p>
+                    Your AI workspace for chat, files, voice, images, and creator tools.
+                  </p>
+                </div>
+
+                <button onClick={dashboardNewChat}>Start New Chat</button>
+              </div>
+
+              <div className="dashboard-stats">
+                <div className="stat-card">
+                  <span>Total Chats</span>
+                  <strong>{stats.totalChats}</strong>
+                </div>
+
+                <div className="stat-card">
+                  <span>Saved Images</span>
+                  <strong>{stats.savedImages}</strong>
+                </div>
+
+                <div className="stat-card">
+                  <span>Assistant</span>
+                  <strong>{assistantName}</strong>
+                </div>
+
+                <div className="stat-card">
+                  <span>Personality</span>
+                  <strong>{personality}</strong>
+                </div>
+              </div>
+
+              <div className="quick-actions-section">
+                <h3>Quick Actions</h3>
+
+                <div className="quick-actions-grid">
+                  <button onClick={dashboardNewChat}>
+                    <span>💬</span>
+                    New Chat
+                  </button>
+
+                  <button onClick={dashboardUploadFile}>
+                    <span>📄</span>
+                    Upload PDF/TXT
+                  </button>
+
+                  <button onClick={dashboardGenerateImage}>
+                    <span>🎨</span>
+                    Generate Image
+                  </button>
+
+                  <button onClick={dashboardOpenGallery}>
+                    <span>🖼️</span>
+                    Open Gallery
+                  </button>
+
+                  <button onClick={dashboardCreatorTools}>
+                    <span>🎬</span>
+                    Creator Tools
+                  </button>
+
+                  <button onClick={goToChat}>
+                    <span>⚡</span>
+                    Continue Chat
+                  </button>
+                </div>
+              </div>
+
+              <div className="dashboard-recent">
+                <h3>Recent Chats</h3>
+
+                {sessions.length === 0 ? (
+                  <p>No chats yet. Start your first conversation.</p>
+                ) : (
+                  sessions.slice(0, 5).map((session) => (
+                    <button
+                      key={session.id}
+                      onClick={() => {
+                        setCurrentView("chat");
+                        openSession(session.id);
+                      }}
+                    >
+                      {session.pinned ? "📌 " : ""}
+                      {session.title}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : currentView === "library" ? (
+            <div className="content-library-view">
+              <div className="content-library-header">
+                <div>
+                  <h2>Content Library</h2>
+                  <p>Your saved AI outputs are stored here.</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setCurrentView("chat");
+                    setLibraryOpen(false);
+                    setVisibleOutputId(null);
+                  }}
+                >
+                  Back to Chat
+                </button>
+              </div>
+
+              {libraryLoading ? (
+                <div className="library-empty">Loading saved outputs...</div>
+              ) : savedOutputs.length === 0 ? (
+                <div className="library-empty">No saved outputs yet.</div>
+              ) : (
+                <div className="library-list">
+                  {savedOutputs.map((item) => (
+                    <div className="library-card" key={item.id}>
+                      <div className="library-card-top">
+                        <div>
+                          <h3>{item.title}</h3>
+                          <span>{item.type}</span>
+                        </div>
+
+                        <small>{new Date(item.created_at).toLocaleDateString()}</small>
+                      </div>
+
+                      <div className="library-actions">
+                        <button
+                          onClick={() =>
+                            setVisibleOutputId(
+                              visibleOutputId === item.id ? null : item.id
+                            )
+                          }
+                        >
+                          {visibleOutputId === item.id ? "Hide" : "Open"}
+                        </button>
+
+                        <button onClick={() => copySavedOutput(item.content)}>
+                          Copy
+                        </button>
+
+                        <button
+                          className="delete-library-btn"
+                          onClick={() => deleteSavedOutput(item.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      {visibleOutputId === item.id && (
+                        <div className="library-content">{item.content}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : galleryOpen ? (
+            <div className="main-gallery-view">
+              <div className="main-gallery-header">
+                <div>
+                  <h2>Saved Image Gallery</h2>
+                  <p>Your generated images are saved here.</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setGalleryOpen(false);
+                    setCurrentView("chat");
+                    setVisiblePromptId(null);
+                  }}
+                >
+                  Back to Chat
+                </button>
+              </div>
+
+              {galleryLoading ? (
+                <div className="gallery-empty-main">Loading gallery...</div>
+              ) : galleryImages.length === 0 ? (
+                <div className="gallery-empty-main">No saved images yet.</div>
+              ) : (
+                <div className="main-gallery-grid">
+                  {galleryImages.map((img) => (
+                    <div className="main-gallery-card" key={img.id}>
+                      <img src={img.image_url} alt={img.prompt} />
+
+                      <div className="main-gallery-actions">
+                        <a href={img.image_url} target="_blank" rel="noreferrer">
+                          Open
+                        </a>
+
+                        <button
+                          onClick={() =>
+                            setVisiblePromptId(
+                              visiblePromptId === img.id ? null : img.id
+                            )
+                          }
+                        >
+                          Prompt
+                        </button>
+
+                        <button
+                          className="delete-gallery-btn"
+                          onClick={() => deleteGalleryImage(img.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      {visiblePromptId === img.id && (
+                        <div className="gallery-prompt-box">{img.prompt}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`message ${msg.role === "user" ? "user" : "ai"}`}
+                >
+                  <strong>{msg.role === "user" ? "You" : assistantName}</strong>
+                  <p>{msg.text}</p>
+
+                  {msg.role === "ai" && (
+                    <div className="message-actions">
+                      <button onClick={() => saveOutputToLibrary(msg.text, "ai_output")}>
+                        Save Output
+                      </button>
+
+                      <button onClick={() => copySavedOutput(msg.text)}>Copy</button>
+                    </div>
+                  )}
+
+                  {msg.role === "ai_image" && msg.imageUrl && (
+                    <div className="generated-image-box">
+                      <a
+                        href={msg.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="generated-image-link"
+                      >
+                        <img
+                          src={msg.imageUrl}
+                          alt={msg.text}
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                      </a>
+
+                      <div className="image-actions">
+                        <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+                          Open Image
+                        </a>
+
+                        <button
+                          onClick={() =>
+                            saveImageToGallery(
+                              msg.enhancedPrompt || msg.originalPrompt || msg.text,
+                              msg.imageUrl
+                            )
+                          }
+                        >
+                          Save Image
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            setVisibleEnhancedPromptId(
+                              visibleEnhancedPromptId === msg.id ? null : msg.id
+                            )
+                          }
+                        >
+                          Prompt
+                        </button>
+                      </div>
+
+                      {visibleEnhancedPromptId === msg.id && (
+                        <div className="enhanced-prompt-box">
+                          <strong>Original:</strong>
+                          <p>{msg.originalPrompt}</p>
+
+                          <strong>Enhanced:</strong>
+                          <p>{msg.enhancedPrompt}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {loading && (
+                <div className="message ai">
+                  <strong>{assistantName}</strong>
+                  <p>Thinking...</p>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+
+        {currentView !== "dashboard" &&
+          currentView !== "library" &&
+          currentView !== "profile" &&
+          !galleryOpen && (
+            <footer className="input-area">
+              <div className="attachment-wrapper">
+                <button
+                  className="plus-btn"
+                  onClick={() => setAttachmentMenuOpen((prev) => !prev)}
+                  disabled={loading}
+                  aria-label="Open attachments menu"
+                >
+                  +
+                </button>
+
+                {attachmentMenuOpen && (
+                  <div className="attachment-menu">
+                    <button onClick={openFilePicker}>Upload File</button>
+
+                    <button onClick={startImageMode}>Generate Image</button>
+
+                    <button onClick={openCreatorPanel}>Creator Tools</button>
+
+                    {creatorMode && (
+                      <button className="danger-item" onClick={exitCreatorMode}>
+                        Exit Creator Mode
+                      </button>
+                    )}
+
+                    {imageMode && (
+                      <button className="danger-item" onClick={exitImageMode}>
+                        Exit Image Mode
+                      </button>
+                    )}
+
+                    {fileMode && (
+                      <button className="danger-item" onClick={clearUploadedFile}>
+                        Clear File Q&A
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.pdf"
+                  onChange={summarizeTextFile}
+                  hidden
+                />
+              </div>
+
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleEnter}
+                placeholder={
+                  creatorMode
+                    ? "Enter your YouTube/video topic..."
+                    : imageMode
+                    ? "Describe image to generate..."
+                    : fileMode
+                    ? `Ask about ${uploadedFileName || "uploaded file"}...`
+                    : `Message ${assistantName}...`
+                }
+              />
+
+              <button
+                className="voice-btn"
+                onClick={startVoiceInput}
+                disabled={loading || listening}
+              >
+                {listening ? "Listening..." : "🎙"}
+              </button>
+
+              <button className="voice-btn" onClick={stopVoiceSystem}>
+                🔇
+              </button>
+
+              <button onClick={sendMessage} disabled={loading}>
+                Send
+              </button>
+            </footer>
+          )}
       </main>
     </div>
   );

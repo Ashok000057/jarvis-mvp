@@ -1966,3 +1966,341 @@ body {
     width: 100%;
   }
 }
+
+/* =========================
+   PROFILE SETTINGS PAGE
+========================= */
+
+.profile-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.profile-btn:hover {
+  background: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.14);
+}
+
+.profile-settings-view {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 40%),
+    rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.08);
+}
+
+.profile-badge {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  font-size: 13px;
+}
+
+.profile-hero h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 34px;
+}
+
+.profile-hero p {
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.profile-hero button {
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.12);
+  color: #d8b4fe;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.profile-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.profile-card {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.76);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+}
+
+.profile-card h3 {
+  margin: 0 0 16px;
+  color: #d8b4fe;
+}
+
+.profile-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.profile-card label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.profile-card input,
+.profile-card select {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  background: rgba(2, 6, 23, 0.9);
+  color: white;
+  outline: none;
+}
+
+.profile-card input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profile-card button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.12);
+  color: #d8b4fe;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.profile-card button:hover {
+  background: rgba(168, 85, 247, 0.22);
+}
+
+.danger-profile-card {
+  border-color: rgba(248, 113, 113, 0.22);
+  background: rgba(127, 29, 29, 0.12);
+}
+
+.danger-profile-card h3 {
+  color: #fca5a5;
+}
+
+.danger-profile-btn,
+.logout-profile-btn {
+  color: #fca5a5 !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+}
+
+.danger-profile-btn:hover,
+.logout-profile-btn:hover {
+  background: rgba(248, 113, 113, 0.16) !important;
+}
+
+@media (max-width: 900px) {
+  .profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-hero button {
+    width: 100%;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-hero h2 {
+    font-size: 26px;
+  }
+}
+
+.profile-btn {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 12px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.profile-btn:hover {
+  background: rgba(168, 85, 247, 0.2);
+}
+
+.profile-settings-view {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 28px;
+  border-radius: 26px;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+}
+
+.profile-badge {
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  font-size: 13px;
+}
+
+.profile-hero h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 34px;
+}
+
+.profile-hero p {
+  color: #cbd5e1;
+}
+
+.profile-hero button {
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.12);
+  color: #d8b4fe;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.profile-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.profile-card {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.76);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+}
+
+.profile-card h3 {
+  margin: 0 0 16px;
+  color: #d8b4fe;
+}
+
+.profile-card p {
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.profile-card label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.profile-card input,
+.profile-card select {
+  width: 100%;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  background: rgba(2, 6, 23, 0.9);
+  color: white;
+  outline: none;
+}
+
+.profile-card input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.profile-card button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.12);
+  color: #d8b4fe;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.danger-profile-card {
+  border-color: rgba(248, 113, 113, 0.22);
+  background: rgba(127, 29, 29, 0.12);
+}
+
+.danger-profile-card h3 {
+  color: #fca5a5;
+}
+
+.danger-profile-btn,
+.logout-profile-btn {
+  color: #fca5a5 !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+  background: rgba(248, 113, 113, 0.08) !important;
+}
+
+@media (max-width: 900px) {
+  .profile-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-hero button {
+    width: 100%;
+  }
+
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-hero h2 {
+    font-size: 26px;
+  }
+}
