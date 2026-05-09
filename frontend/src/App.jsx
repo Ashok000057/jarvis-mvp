@@ -141,6 +141,11 @@ export default function App() {
   const [creatorPanelOpen, setCreatorPanelOpen] = useState(false);
   const [creatorTopic, setCreatorTopic] = useState("");
   const [creatorTool, setCreatorTool] = useState("full_package");
+  
+  const [libraryOpen, setLibraryOpen] = useState(false); 
+  const [savedOutputs, setSavedOutputs] = useState([]);
+  const [libraryLoading, setLibraryLoading] = useState(false);
+  const [visibleOutputId, setVisibleOutputId] = useState(null);
 
   const [stats, setStats] = useState({
     totalChats: 0,
@@ -988,6 +993,92 @@ Reply in the same language style as the user.
     ]);
   };
 
+  const loadContentLibrary = async () => {
+  try {
+    const authConfig = await getAuthHeaders();
+
+    setLibraryLoading(true);
+
+    const res = await axios.get(`${API_URL}/api/outputs`, authConfig);
+
+    if (res.data.success) {
+      setSavedOutputs(res.data.outputs || []);
+    }
+  } catch (error) {
+    console.error("Load content library error:", error);
+    alert("Failed to load content library.");
+  } finally {
+    setLibraryLoading(false);
+  }
+};
+
+const openContentLibrary = async () => {
+  setCurrentView("library");
+  setLibraryOpen(true);
+  setGalleryOpen(false);
+  setSidebarOpen(false);
+  setVisibleOutputId(null);
+  await loadContentLibrary();
+};
+
+const saveOutputToLibrary = async (content, type = "general") => {
+  if (!content || !content.trim()) {
+    alert("Nothing to save");
+    return;
+  }
+
+  const titleInput = window.prompt("Save title:", type + " output");
+
+  if (!titleInput || !titleInput.trim()) return;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    const res = await axios.post(
+      `${API_URL}/api/outputs/save`,
+      {
+        title: titleInput.trim(),
+        content,
+        type,
+      },
+      authConfig
+    );
+
+    if (res.data.success) {
+      alert("Saved to Content Library ✅");
+      await loadContentLibrary();
+    }
+  } catch (error) {
+    console.error("Save output error:", error);
+    alert("Failed to save output.");
+  }
+};
+
+const deleteSavedOutput = async (id) => {
+  const confirmDelete = window.confirm("Delete this saved output?");
+  if (!confirmDelete) return;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    await axios.delete(`${API_URL}/api/outputs/${id}`, authConfig);
+
+    setSavedOutputs((prev) => prev.filter((item) => item.id !== id));
+  } catch (error) {
+    console.error("Delete saved output error:", error);
+    alert("Failed to delete saved output.");
+  }
+};
+
+const copySavedOutput = async (content) => {
+  try {
+    await navigator.clipboard.writeText(content);
+    alert("Copied ✅");
+  } catch (error) {
+    alert("Copy failed");
+  }
+};
+
   const generateImageFromPrompt = async (prompt) => {
   if (!prompt || !prompt.trim()) return;
 
@@ -1753,6 +1844,13 @@ if (!user && showAuth) {
             Clear All Memory
           </button>
         </div>
+        <div className="library-box">
+  <p>Content Library</p>
+
+  <button onClick={openContentLibrary}>
+    Open Saved Outputs
+  </button>
+</div>
 
 <div className="gallery-box">
   <p>Image Gallery</p>
@@ -1834,47 +1932,47 @@ if (!user && showAuth) {
   ))}
 </div>
 
-  <section className="messages">
+<section className="messages">
+  {creatorPanelOpen && currentView !== "dashboard" && currentView !== "library" && !galleryOpen && (
+    <div className="creator-panel">
+      <div className="creator-panel-header">
+        <div>
+          <h2>Creator Tools</h2>
+          <p>Choose a tool, enter your topic, and generate ready-to-use content.</p>
+        </div>
 
-    {creatorPanelOpen && (
-  <div className="creator-panel">
-    <div className="creator-panel-header">
-      <div>
-        <h2>Creator Tools</h2>
-        <p>Choose a tool, enter your topic, and generate ready-to-use content.</p>
+        <button onClick={closeCreatorPanel}>×</button>
       </div>
 
-      <button onClick={closeCreatorPanel}>×</button>
-    </div>
+      <div className="creator-tools-grid">
+        {CREATOR_TOOLS.map((tool) => (
+          <button
+            key={tool.id}
+            className={creatorTool === tool.id ? "active-creator-tool" : ""}
+            onClick={() => setCreatorTool(tool.id)}
+          >
+            <span>{tool.icon}</span>
+            {tool.title}
+          </button>
+        ))}
+      </div>
 
-    <div className="creator-tools-grid">
-      {CREATOR_TOOLS.map((tool) => (
-        <button
-          key={tool.id}
-          className={creatorTool === tool.id ? "active-creator-tool" : ""}
-          onClick={() => setCreatorTool(tool.id)}
-        >
-          <span>{tool.icon}</span>
-          {tool.title}
+      <div className="creator-topic-box">
+        <label>Topic / Idea</label>
+
+        <textarea
+          value={creatorTopic}
+          onChange={(e) => setCreatorTopic(e.target.value)}
+          placeholder="Example: AI tools for students, how to make money online, best study apps..."
+        />
+
+        <button onClick={generateCreatorContent} disabled={loading}>
+          {loading ? "Generating..." : "Generate Content"}
         </button>
-      ))}
+      </div>
     </div>
+  )}
 
-    <div className="creator-topic-box">
-      <label>Topic / Idea</label>
-
-      <textarea
-        value={creatorTopic}
-        onChange={(e) => setCreatorTopic(e.target.value)}
-        placeholder="Example: AI tools for students, how to make money online, best study apps..."
-      />
-
-      <button onClick={generateCreatorContent} disabled={loading}>
-        {loading ? "Generating..." : "Generate Content"}
-      </button>
-    </div>
-  </div>
-)}
   {currentView === "dashboard" ? (
     <div className="dashboard-view">
       <div className="dashboard-hero">
@@ -1968,6 +2066,73 @@ if (!user && showAuth) {
         )}
       </div>
     </div>
+  ) : currentView === "library" ? (
+    <div className="content-library-view">
+      <div className="content-library-header">
+        <div>
+          <h2>Content Library</h2>
+          <p>Your saved AI outputs are stored here.</p>
+        </div>
+
+        <button
+          onClick={() => {
+            setCurrentView("chat");
+            setLibraryOpen(false);
+            setVisibleOutputId(null);
+          }}
+        >
+          Back to Chat
+        </button>
+      </div>
+
+      {libraryLoading ? (
+        <div className="library-empty">Loading saved outputs...</div>
+      ) : savedOutputs.length === 0 ? (
+        <div className="library-empty">No saved outputs yet.</div>
+      ) : (
+        <div className="library-list">
+          {savedOutputs.map((item) => (
+            <div className="library-card" key={item.id}>
+              <div className="library-card-top">
+                <div>
+                  <h3>{item.title}</h3>
+                  <span>{item.type}</span>
+                </div>
+
+                <small>{new Date(item.created_at).toLocaleDateString()}</small>
+              </div>
+
+              <div className="library-actions">
+                <button
+                  onClick={() =>
+                    setVisibleOutputId(
+                      visibleOutputId === item.id ? null : item.id
+                    )
+                  }
+                >
+                  {visibleOutputId === item.id ? "Hide" : "Open"}
+                </button>
+
+                <button onClick={() => copySavedOutput(item.content)}>
+                  Copy
+                </button>
+
+                <button
+                  className="delete-library-btn"
+                  onClick={() => deleteSavedOutput(item.id)}
+                >
+                  Delete
+                </button>
+              </div>
+
+              {visibleOutputId === item.id && (
+                <div className="library-content">{item.content}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   ) : galleryOpen ? (
     <div className="main-gallery-view">
       <div className="main-gallery-header">
@@ -2037,6 +2202,16 @@ if (!user && showAuth) {
         >
           <strong>{msg.role === "user" ? "You" : assistantName}</strong>
           <p>{msg.text}</p>
+
+          {msg.role === "ai" && (
+            <div className="message-actions">
+              <button onClick={() => saveOutputToLibrary(msg.text, "ai_output")}>
+                Save Output
+              </button>
+
+              <button onClick={() => copySavedOutput(msg.text)}>Copy</button>
+            </div>
+          )}
 
           {msg.role === "ai_image" && msg.imageUrl && (
             <div className="generated-image-box">
@@ -2116,11 +2291,13 @@ if (!user && showAuth) {
               +
             </button>
 
-            {currentView !== "dashboard" && (
-  <footer className="input-area">
-    ...
-  </footer>
-)}
+            {currentView !== "dashboard" &&
+  currentView !== "library" &&
+  !galleryOpen && (
+    <footer className="input-area">
+      {/* tumhara existing input-area content yahin rahega */}
+    </footer>
+  )}
 
             {attachmentMenuOpen && (
               <div className="attachment-menu">
