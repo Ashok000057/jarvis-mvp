@@ -119,6 +119,7 @@ export default function App() {
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [slowResponse, setSlowResponse] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const [voiceOutput, setVoiceOutput] = useState(true);
@@ -599,6 +600,12 @@ ${chatText}`;
 
       setLoading(true);
 
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
+
       const res = await axios.post(
         `${API_URL}/api/files/summarize`,
         formData,
@@ -665,6 +672,12 @@ ${chatText}`;
 
       setInput("");
       setLoading(true);
+
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
 
       const res = await axios.post(
         `${API_URL}/api/files/ask`,
@@ -843,6 +856,12 @@ Rules:
       setCreatorPanelOpen(false);
       setLoading(true);
 
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
+
       const res = await axios.post(
         `${API_URL}/api/chat`,
         {
@@ -983,6 +1002,12 @@ Reply in the same language style as the user.
 
       setInput("");
       setLoading(true);
+
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
 
       const res = await axios.post(
         `${API_URL}/api/chat`,
@@ -1217,6 +1242,12 @@ const copyDocumentSummary = async (summary) => {
 
       setInput("");
       setLoading(true);
+
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
 
       const res = await axios.post(
         `${API_URL}/api/image/generate`,
@@ -1556,6 +1587,12 @@ const copyDocumentSummary = async (summary) => {
       setInput("");
       setLoading(true);
 
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
+
       const res = await axios.post(
         `${API_URL}/api/chat`,
         {
@@ -1590,7 +1627,7 @@ const copyDocumentSummary = async (summary) => {
         ...prev,
         {
           role: "ai",
-          text: "Sorry, something went wrong. Check backend terminal.",
+          text: "Jarvis ko response lene me problem aa rahi hai. Please Retry karein.",
         },
       ]);
     } finally {
@@ -1657,6 +1694,12 @@ const copyDocumentSummary = async (summary) => {
 
       setInput("");
       setLoading(true);
+
+      setSlowResponse(false);
+
+setTimeout(() => {
+  setSlowResponse(true);
+}, 12000);
 
       const res = await axios.post(
         `${API_URL}/api/chat`,
@@ -2610,11 +2653,18 @@ const copyDocumentSummary = async (summary) => {
               ))}
 
               {loading && (
-                <div className="message ai">
-                  <strong>{assistantName}</strong>
-                  <p>Thinking...</p>
-                </div>
-              )}
+  <div className="message ai">
+    <strong>{assistantName}</strong>
+    <p>
+      Thinking
+      <span className="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+    </p>
+  </div>
+)}
             </>
           )}
         </section>

@@ -2466,3 +2466,77 @@ body {
     width: 100%;
   }
 }
+
+/* =========================
+   STABILITY / UX POLISH
+========================= */
+
+.message.ai p {
+  word-break: break-word;
+}
+
+.message.ai p:has(.typing-dots) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typing-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  background: #67e8f9;
+  border-radius: 999px;
+  animation: dotPulse 1s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button {
+  transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-area input,
+.auth-card input,
+.settings-box input,
+.settings-box select {
+  transition: border 0.15s ease, box-shadow 0.15s ease;
+}
+
+.messages {
+  scroll-behavior: smooth;
+}
+
+.slow-response-note {
+  display: block;
+  margin-top: 8px;
+  color: #facc15;
+  font-size: 12px;
+}
