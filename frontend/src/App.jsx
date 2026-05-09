@@ -5,6 +5,49 @@ import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const PROMPT_TEMPLATES = [
+  {
+    title: "YouTube Script",
+    prompt:
+      "Mere liye ek YouTube video script likho topic: [topic]. Isme strong hook, intro, main points, examples, outro aur CTA include karo.",
+  },
+  {
+    title: "Study Notes",
+    prompt:
+      "Is topic par easy study notes banao: [topic]. Short explanation, bullet points, examples aur revision summary do.",
+  },
+  {
+    title: "Email Writer",
+    prompt:
+      "Mere liye ek professional email likho. Context: [context]. Tone polite aur clear hona chahiye.",
+  },
+  {
+    title: "Instagram Caption",
+    prompt:
+      "Is topic/product ke liye engaging Instagram caption likho: [topic]. Hashtags aur hook bhi add karo.",
+  },
+  {
+    title: "Business Plan",
+    prompt:
+      "Mere business idea ke liye simple business plan banao: [idea]. Target audience, features, pricing aur marketing plan do.",
+  },
+  {
+    title: "Code Helper",
+    prompt:
+      "Mujhe is coding problem me help karo: [problem]. Step-by-step explain karo aur working code do.",
+  },
+  {
+    title: "Image Prompt",
+    prompt:
+      "Mere simple idea ko ek professional AI image prompt me convert karo: [idea]. Cinematic details, lighting, style aur quality keywords add karo.",
+  },
+  {
+    title: "PDF Notes",
+    prompt:
+      "Uploaded PDF/file se short notes banao. Important points, summary, questions and answers, aur exam revision points do.",
+  },
+];
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [authMode, setAuthMode] = useState("login");
@@ -1030,6 +1073,20 @@ ${chatText}`;
     window.speechSynthesis.cancel();
   };
 
+  const applyPromptTemplate = (template) => {
+  setImageMode(false);
+
+  setInput(template.prompt);
+
+  setMessages((prev) => [
+    ...prev,
+    {
+      role: "ai",
+      text: `Template selected: ${template.title}. Prompt ko edit karke Send dabao.`,
+    },
+  ]);
+};
+
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       sendMessage();
@@ -1327,6 +1384,18 @@ if (!user && showAuth) {
             </span>
           </div>
         </header>
+
+        <div className="prompt-template-bar">
+  {PROMPT_TEMPLATES.map((template) => (
+    <button
+      key={template.title}
+      onClick={() => applyPromptTemplate(template)}
+      disabled={loading}
+    >
+      {template.title}
+    </button>
+  ))}
+</div>
 
         <section className="messages">
           {messages.map((msg, index) => (

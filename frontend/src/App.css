@@ -1100,3 +1100,59 @@ body {
     padding: 32px 20px;
   }
 }
+
+/* =========================
+   PROMPT TEMPLATE BAR
+========================= */
+
+.prompt-template-bar {
+  display: flex;
+  gap: 10px;
+  padding: 14px 26px;
+  overflow-x: auto;
+  border-bottom: 1px solid rgba(0, 234, 255, 0.14);
+  background: rgba(2, 6, 23, 0.78);
+}
+
+.prompt-template-bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.prompt-template-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 234, 255, 0.25);
+  border-radius: 999px;
+}
+
+.prompt-template-bar button {
+  white-space: nowrap;
+  border: 1px solid rgba(0, 234, 255, 0.25);
+  background: rgba(0, 234, 255, 0.08);
+  color: #67e8f9;
+  padding: 9px 13px;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.prompt-template-bar button:hover {
+  background: rgba(0, 234, 255, 0.18);
+  box-shadow: 0 0 16px rgba(0, 234, 255, 0.12);
+}
+
+.prompt-template-bar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .prompt-template-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .prompt-template-bar button {
+    font-size: 11px;
+    padding: 8px 11px;
+  }
+}
