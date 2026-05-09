@@ -1417,3 +1417,42 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.enhanced-prompt-box {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.8);
+  border: 1px solid rgba(0, 234, 255, 0.18);
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.enhanced-prompt-box strong {
+  display: block;
+  color: #67e8f9;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+
+.enhanced-prompt-box p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+
+.image-actions button {
+  color: #67e8f9;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  border: 1px solid rgba(0, 234, 255, 0.25);
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(0, 234, 255, 0.08);
+  cursor: pointer;
+}
+
+.image-actions button:hover {
+  background: rgba(0, 234, 255, 0.18);
+}

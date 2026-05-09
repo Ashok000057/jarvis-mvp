@@ -82,6 +82,7 @@ export default function App() {
   const [fileMode, setFileMode] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [imageMode, setImageMode] = useState(false);
+  const [visibleEnhancedPromptId, setVisibleEnhancedPromptId] = useState(null);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState([]);
@@ -661,54 +662,59 @@ ${chatText}`;
   };
 
   const generateImageFromPrompt = async (prompt) => {
-    if (!prompt || !prompt.trim()) return;
+  if (!prompt || !prompt.trim()) return;
 
-    try {
-      const authConfig = await getAuthHeaders();
+  try {
+    const authConfig = await getAuthHeaders();
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "user",
-          text: `Generate image: ${prompt}`,
-        },
-      ]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        text: `Generate image: ${prompt}`,
+      },
+    ]);
 
-      setInput("");
-      setLoading(true);
+    setInput("");
+    setLoading(true);
 
-      const res = await axios.post(
-        `${API_URL}/api/image/generate`,
-        {
-          prompt,
-        },
-        authConfig
-      );
+    const res = await axios.post(
+      `${API_URL}/api/image/generate`,
+      {
+        prompt,
+      },
+      authConfig
+    );
 
-      if (res.data.success) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "ai_image",
-            text: `Generated image for: ${res.data.prompt}`,
-            imageUrl: res.data.imageUrl,
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Image generation error:", error);
+    if (res.data.success) {
+      const imageMessageId = `img-${Date.now()}`;
 
       setMessages((prev) => [
         ...prev,
         {
-          role: "ai",
-          text: "Image generation failed. Check backend terminal.",
+          id: imageMessageId,
+          role: "ai_image",
+          text: `Generated image for: ${res.data.originalPrompt || prompt}`,
+          originalPrompt: res.data.originalPrompt || prompt,
+          enhancedPrompt: res.data.enhancedPrompt || res.data.prompt || prompt,
+          imageUrl: res.data.imageUrl,
         },
       ]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Image generation error:", error);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Image generation failed. Check backend terminal.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadGallery = async () => {
   try {
@@ -1556,39 +1562,59 @@ if (!user && showAuth) {
           <p>{msg.text}</p>
 
           {msg.role === "ai_image" && msg.imageUrl && (
-            <div className="generated-image-box">
-              <a
-                href={msg.imageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="generated-image-link"
-              >
-                <img
-                  src={msg.imageUrl}
-                  alt={msg.text}
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                />
-              </a>
+  <div className="generated-image-box">
+    <a
+      href={msg.imageUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="generated-image-link"
+    >
+      <img
+        src={msg.imageUrl}
+        alt={msg.text}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    </a>
 
-              <div className="image-actions">
-                <a href={msg.imageUrl} target="_blank" rel="noreferrer">
-                  Open Image
-                </a>
+    <div className="image-actions">
+      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+        Open Image
+      </a>
 
-                <button
-                  onClick={() =>
-                    saveImageToGallery(
-                      msg.text.replace("Generated image for: ", ""),
-                      msg.imageUrl
-                    )
-                  }
-                >
-                  Save Image
-                </button>
-              </div>
-            </div>
-          )}
+      <button
+        onClick={() =>
+          saveImageToGallery(
+            msg.enhancedPrompt || msg.originalPrompt || msg.text,
+            msg.imageUrl
+          )
+        }
+      >
+        Save Image
+      </button>
+
+      <button
+        onClick={() =>
+          setVisibleEnhancedPromptId(
+            visibleEnhancedPromptId === msg.id ? null : msg.id
+          )
+        }
+      >
+        Prompt
+      </button>
+    </div>
+
+    {visibleEnhancedPromptId === msg.id && (
+      <div className="enhanced-prompt-box">
+        <strong>Original:</strong>
+        <p>{msg.originalPrompt}</p>
+
+        <strong>Enhanced:</strong>
+        <p>{msg.enhancedPrompt}</p>
+      </div>
+    )}
+  </div>
+)}
         </div>
       ))}
 
