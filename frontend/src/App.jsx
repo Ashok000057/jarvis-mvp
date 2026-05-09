@@ -5,6 +5,51 @@ import "./App.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+const CREATOR_TOOLS = [
+  {
+    id: "youtube_script",
+    icon: "🎬",
+    title: "YouTube Script",
+    instruction:
+      "Create a full YouTube video script with hook, intro, main points, examples, outro and CTA.",
+  },
+  {
+    id: "shorts_script",
+    icon: "📱",
+    title: "Shorts/Reels Script",
+    instruction:
+      "Create a 30-60 second short video script with hook, quick value and strong ending.",
+  },
+  {
+    id: "title_ideas",
+    icon: "🔥",
+    title: "Title Ideas",
+    instruction:
+      "Generate 10 high-CTR YouTube title ideas with curiosity and SEO value.",
+  },
+  {
+    id: "thumbnail_prompt",
+    icon: "🖼️",
+    title: "Thumbnail Prompt",
+    instruction:
+      "Create a professional AI image prompt for a high-CTR YouTube thumbnail.",
+  },
+  {
+    id: "description_tags",
+    icon: "🏷️",
+    title: "Description + Tags",
+    instruction:
+      "Create SEO-friendly YouTube description, hashtags and video tags.",
+  },
+  {
+    id: "full_package",
+    icon: "🚀",
+    title: "Full Creator Package",
+    instruction:
+      "Create title ideas, hook, full script, shorts script, thumbnail prompt, description, tags and pinned comment.",
+  },
+];
+
 const PROMPT_TEMPLATES = [
   {
     title: "YouTube Script",
@@ -93,7 +138,10 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
   const [currentView, setCurrentView] = useState("dashboard");
- 
+  const [creatorPanelOpen, setCreatorPanelOpen] = useState(false);
+  const [creatorTopic, setCreatorTopic] = useState("");
+  const [creatorTool, setCreatorTool] = useState("full_package");
+
   const [stats, setStats] = useState({
     totalChats: 0,
     savedImages: 0,
@@ -681,6 +729,113 @@ const dashboardCreatorTools = () => {
     setImageMode(false);
     fileInputRef.current?.click();
   };
+
+  const openCreatorPanel = () => {
+  setAttachmentMenuOpen(false);
+  setCreatorPanelOpen(true);
+};
+
+const closeCreatorPanel = () => {
+  setCreatorPanelOpen(false);
+  setCreatorTopic("");
+};
+
+const generateCreatorContent = async () => {
+  if (!creatorTopic.trim()) {
+    alert("Topic required");
+    return;
+  }
+
+  const selectedTool =
+    CREATOR_TOOLS.find((tool) => tool.id === creatorTool) ||
+    CREATOR_TOOLS[0];
+
+  const creatorPrompt = `
+You are a professional content creator, YouTube strategist, script writer and social media expert.
+
+Task:
+${selectedTool.instruction}
+
+Topic:
+${creatorTopic}
+
+Rules:
+- Make output practical and ready to use.
+- Use strong hooks.
+- Use simple language.
+- Reply in the same language style as user.
+- Use clear headings.
+- Add examples where helpful.
+`;
+
+  let sessionId = activeSessionId;
+
+  try {
+    const authConfig = await getAuthHeaders();
+
+    if (!sessionId) {
+      const sessionRes = await axios.post(
+        `${API_URL}/api/sessions`,
+        {
+          title:
+            creatorTopic.length > 32
+              ? creatorTopic.slice(0, 32) + "..."
+              : creatorTopic,
+        },
+        authConfig
+      );
+
+      if (sessionRes.data.success) {
+        sessionId = sessionRes.data.session.id;
+        setActiveSessionId(sessionId);
+        setSessions((prev) => [sessionRes.data.session, ...prev]);
+      }
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        text: `${selectedTool.title}: ${creatorTopic}`,
+      },
+    ]);
+
+    setCreatorPanelOpen(false);
+    setLoading(true);
+
+    const res = await axios.post(
+      `${API_URL}/api/chat`,
+      {
+        message: creatorPrompt,
+        sessionId,
+      },
+      authConfig
+    );
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: res.data.reply,
+      },
+    ]);
+
+    speakText(res.data.reply);
+    await loadSessions();
+  } catch (error) {
+    console.error("Creator tools error:", error);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Creator tools failed. Check backend terminal.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const startImageMode = () => {
     setAttachmentMenuOpen(false);
@@ -1501,6 +1656,8 @@ if (!user && showAuth) {
         ☰
       </button>
 
+      
+
       {sidebarOpen && (
         <div
           className="sidebar-backdrop"
@@ -1520,7 +1677,14 @@ if (!user && showAuth) {
           </button>
         </div>
 
-        <button className="dashboard-btn" onClick={() => setCurrentView("dashboard")}>
+        <button
+  className="dashboard-btn"
+  onClick={() => {
+    setCurrentView("dashboard");
+    setSidebarOpen(false);
+    setGalleryOpen(false);
+  }}
+>
   Dashboard
 </button>
 
@@ -1671,6 +1835,46 @@ if (!user && showAuth) {
 </div>
 
   <section className="messages">
+
+    {creatorPanelOpen && (
+  <div className="creator-panel">
+    <div className="creator-panel-header">
+      <div>
+        <h2>Creator Tools</h2>
+        <p>Choose a tool, enter your topic, and generate ready-to-use content.</p>
+      </div>
+
+      <button onClick={closeCreatorPanel}>×</button>
+    </div>
+
+    <div className="creator-tools-grid">
+      {CREATOR_TOOLS.map((tool) => (
+        <button
+          key={tool.id}
+          className={creatorTool === tool.id ? "active-creator-tool" : ""}
+          onClick={() => setCreatorTool(tool.id)}
+        >
+          <span>{tool.icon}</span>
+          {tool.title}
+        </button>
+      ))}
+    </div>
+
+    <div className="creator-topic-box">
+      <label>Topic / Idea</label>
+
+      <textarea
+        value={creatorTopic}
+        onChange={(e) => setCreatorTopic(e.target.value)}
+        placeholder="Example: AI tools for students, how to make money online, best study apps..."
+      />
+
+      <button onClick={generateCreatorContent} disabled={loading}>
+        {loading ? "Generating..." : "Generate Content"}
+      </button>
+    </div>
+  </div>
+)}
   {currentView === "dashboard" ? (
     <div className="dashboard-view">
       <div className="dashboard-hero">
@@ -1923,7 +2127,7 @@ if (!user && showAuth) {
                 <button onClick={openFilePicker}>Upload File</button>
 
                 <button onClick={startImageMode}>Generate Image</button>
-                <button onClick={startCreatorMode}>Creator Tools</button>
+                <button onClick={openCreatorPanel}>Creator Tools</button>
 
 {creatorMode && (
   <button className="danger-item" onClick={exitCreatorMode}>
