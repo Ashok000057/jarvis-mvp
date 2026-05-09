@@ -37,6 +37,7 @@ export default function App() {
 
   const [fileMode, setFileMode] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [imageMode, setImageMode] = useState(false);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachmentMenuOpen, setAttachmentMenuOpen] = useState(false);
@@ -131,7 +132,9 @@ export default function App() {
     setActiveSessionId(null);
     setFileMode(false);
     setUploadedFileName("");
+    setImageMode(false);
     setSidebarOpen(false);
+
     setMessages([
       {
         role: "ai",
@@ -205,6 +208,9 @@ export default function App() {
         setActiveSessionId(newSession.id);
         setSessions((prev) => [newSession, ...prev]);
         setSidebarOpen(false);
+        setFileMode(false);
+        setUploadedFileName("");
+        setImageMode(false);
 
         setMessages([
           {
@@ -227,6 +233,7 @@ export default function App() {
 
       setActiveSessionId(sessionId);
       setSidebarOpen(false);
+      setImageMode(false);
 
       const res = await axios.get(
         `${API_URL}/api/sessions/${sessionId}/messages`,
@@ -301,6 +308,10 @@ export default function App() {
 
       if (activeSessionId === sessionId) {
         setActiveSessionId(null);
+        setFileMode(false);
+        setUploadedFileName("");
+        setImageMode(false);
+
         setMessages([
           {
             role: "ai",
@@ -359,6 +370,10 @@ export default function App() {
 
       setSessions([]);
       setActiveSessionId(null);
+      setFileMode(false);
+      setUploadedFileName("");
+      setImageMode(false);
+
       setMessages([
         {
           role: "ai",
@@ -422,6 +437,7 @@ ${chatText}`;
     }
 
     setAttachmentMenuOpen(false);
+    setImageMode(false);
 
     try {
       const authConfig = await getAuthHeaders();
@@ -564,7 +580,85 @@ ${chatText}`;
 
   const openFilePicker = () => {
     setAttachmentMenuOpen(false);
+    setImageMode(false);
     fileInputRef.current?.click();
+  };
+
+  const startImageMode = () => {
+    setAttachmentMenuOpen(false);
+    setFileMode(false);
+    setImageMode(true);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Image mode ON. Chatbox me image prompt likho aur Send dabao.",
+      },
+    ]);
+  };
+
+  const exitImageMode = () => {
+    setImageMode(false);
+    setAttachmentMenuOpen(false);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Image mode OFF. You can continue normal chat.",
+      },
+    ]);
+  };
+
+  const generateImageFromPrompt = async (prompt) => {
+    if (!prompt || !prompt.trim()) return;
+
+    try {
+      const authConfig = await getAuthHeaders();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          text: `Generate image: ${prompt}`,
+        },
+      ]);
+
+      setInput("");
+      setLoading(true);
+
+      const res = await axios.post(
+        `${API_URL}/api/image/generate`,
+        {
+          prompt,
+        },
+        authConfig
+      );
+
+      if (res.data.success) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "ai_image",
+            text: `Generated image for: ${res.data.prompt}`,
+            imageUrl: res.data.imageUrl,
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Image generation error:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Image generation failed. Check backend terminal.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const speakText = (text, afterSpeak = null) => {
@@ -637,7 +731,9 @@ ${chatText}`;
         setInput(transcript);
 
         setTimeout(() => {
-          if (fileMode) {
+          if (imageMode) {
+            generateImageFromPrompt(transcript);
+          } else if (fileMode) {
             askUploadedFile(transcript);
           } else {
             sendVoiceMessage(transcript);
@@ -840,6 +936,11 @@ ${chatText}`;
 
     const userMessage = input.trim();
 
+    if (imageMode) {
+      await generateImageFromPrompt(userMessage);
+      return;
+    }
+
     if (fileMode) {
       await askUploadedFile(userMessage);
       return;
@@ -982,24 +1083,24 @@ ${chatText}`;
     );
   }
 
- return (
-  <div className="app">
-    <button
-      className={`sidebar-toggle ${sidebarOpen ? "hide-toggle" : ""}`}
-      onClick={() => setSidebarOpen(true)}
-      aria-label="Open sidebar"
-    >
-      ☰
-    </button>
+  return (
+    <div className="app">
+      <button
+        className={`sidebar-toggle ${sidebarOpen ? "hide-toggle" : ""}`}
+        onClick={() => setSidebarOpen(true)}
+        aria-label="Open sidebar"
+      >
+        ☰
+      </button>
 
-    {sidebarOpen && (
-      <div
-        className="sidebar-backdrop"
-        onClick={() => setSidebarOpen(false)}
-      />
-    )}
+      {sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-    <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
+      <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <h2>{assistantName.toUpperCase()}</h2>
           <button
@@ -1130,6 +1231,7 @@ ${chatText}`;
               Online • Memory Enabled • {personality}{" "}
               {liveMode ? "• Live Voice ON" : ""}
               {fileMode ? " • File Q&A ON" : ""}
+              {imageMode ? " • Image Mode ON" : ""}
             </span>
           </div>
         </header>
@@ -1142,6 +1244,34 @@ ${chatText}`;
             >
               <strong>{msg.role === "user" ? "You" : assistantName}</strong>
               <p>{msg.text}</p>
+
+             {msg.role === "ai_image" && msg.imageUrl && (
+  <div className="generated-image-box">
+    <a
+      href={msg.imageUrl}
+      target="_blank"
+      rel="noreferrer"
+      className="generated-image-link"
+    >
+      <img
+        src={msg.imageUrl}
+        alt={msg.text}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+    </a>
+
+    <div className="image-actions">
+      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+        Open Image
+      </a>
+
+      <a href={msg.imageUrl} target="_blank" rel="noreferrer">
+        Download
+      </a>
+    </div>
+  </div>
+)}
             </div>
           ))}
 
@@ -1168,6 +1298,14 @@ ${chatText}`;
               <div className="attachment-menu">
                 <button onClick={openFilePicker}>Upload File</button>
 
+                <button onClick={startImageMode}>Generate Image</button>
+
+                {imageMode && (
+                  <button className="danger-item" onClick={exitImageMode}>
+                    Exit Image Mode
+                  </button>
+                )}
+
                 {fileMode && (
                   <button className="danger-item" onClick={clearUploadedFile}>
                     Clear File Q&A
@@ -1190,7 +1328,9 @@ ${chatText}`;
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleEnter}
             placeholder={
-              fileMode
+              imageMode
+                ? "Describe image to generate..."
+                : fileMode
                 ? `Ask about ${uploadedFileName || "uploaded file"}...`
                 : `Message ${assistantName}...`
             }
