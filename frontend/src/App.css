@@ -2540,3 +2540,30 @@ button {
   color: #facc15;
   font-size: 12px;
 }
+
+.web-sources-box {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.8);
+  border: 1px solid rgba(0, 234, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.web-sources-box strong {
+  color: #67e8f9;
+  font-size: 14px;
+}
+
+.web-sources-box a {
+  color: #a5f3fc;
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.web-sources-box a:hover {
+  text-decoration: underline;
+}

@@ -128,6 +128,7 @@ export default function App() {
   const [fileMode, setFileMode] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [imageMode, setImageMode] = useState(false);
+  const [webSearchMode, setWebSearchMode] = useState(false);
   const [visibleEnhancedPromptId, setVisibleEnhancedPromptId] = useState(null);
   const [creatorMode, setCreatorMode] = useState(false);
 
@@ -160,6 +161,14 @@ export default function App() {
   });
 
   const fileInputRef = useRef(null);
+
+  const startSlowTimer = () => {
+  setSlowResponse(false);
+
+  setTimeout(() => {
+    setSlowResponse(true);
+  }, 12000);
+};
 
   useEffect(() => {
     checkUser();
@@ -252,6 +261,7 @@ export default function App() {
     setFileMode(false);
     setUploadedFileName("");
     setImageMode(false);
+    setWebSearchMode(false);
     setCreatorMode(false);
     setGalleryOpen(false);
     setLibraryOpen(false);
@@ -340,6 +350,7 @@ export default function App() {
         setFileMode(false);
         setUploadedFileName("");
         setImageMode(false);
+        setWebSearchMode(false);
         setCreatorMode(false);
         setGalleryOpen(false);
         setLibraryOpen(false);
@@ -447,6 +458,7 @@ export default function App() {
         setFileMode(false);
         setUploadedFileName("");
         setImageMode(false);
+        setWebSearchMode(false);
         setCreatorMode(false);
         setGalleryOpen(false);
         setLibraryOpen(false);
@@ -512,6 +524,7 @@ export default function App() {
       setFileMode(false);
       setUploadedFileName("");
       setImageMode(false);
+      setWebSearchMode(false);
       setCreatorMode(false);
       setGalleryOpen(false);
       setLibraryOpen(false);
@@ -581,6 +594,7 @@ ${chatText}`;
 
     setAttachmentMenuOpen(false);
     setImageMode(false);
+    setWebSearchMode(false);
     setCreatorMode(false);
     setCurrentView("chat");
 
@@ -778,6 +792,7 @@ setTimeout(() => {
   const openFilePicker = () => {
     setAttachmentMenuOpen(false);
     setImageMode(false);
+    setWebSearchMode(false);
     setCreatorMode(false);
     fileInputRef.current?.click();
   };
@@ -1287,6 +1302,88 @@ setTimeout(() => {
     }
   };
 
+  const startWebSearchMode = () => {
+    setAttachmentMenuOpen(false);
+    setFileMode(false);
+    setImageMode(false);
+    setCreatorMode(false);
+    setWebSearchMode(true);
+    setCurrentView("chat");
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Live Web Search Mode ON. Chatbox me latest/current information ka question likho.",
+      },
+    ]);
+  };
+
+  const exitWebSearchMode = () => {
+    setWebSearchMode(false);
+    setAttachmentMenuOpen(false);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        text: "Live Web Search Mode OFF. You can continue normal chat.",
+      },
+    ]);
+  };
+
+  const searchLiveWeb = async (query) => {
+    if (!query || !query.trim()) return;
+
+    try {
+      const authConfig = await getAuthHeaders();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          text: `Live search: ${query}`,
+        },
+      ]);
+
+      setInput("");
+      setLoading(true);
+      startSlowTimer();
+
+      const res = await axios.post(
+        `${API_URL}/api/web/search`,
+        { query },
+        authConfig
+      );
+
+      if (res.data.success) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "ai_web",
+            text: res.data.answer,
+            sources: res.data.sources || [],
+          },
+        ]);
+
+        speakText(res.data.answer);
+      }
+    } catch (error) {
+      console.error("Live web search error:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: error.response?.data?.error || "Live web search failed. Please retry.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+      setSlowResponse(false);
+    }
+  };
+
   const loadGallery = async () => {
     try {
       const authConfig = await getAuthHeaders();
@@ -1434,7 +1531,9 @@ setTimeout(() => {
         setInput(transcript);
 
         setTimeout(() => {
-          if (imageMode) {
+          if (webSearchMode) {
+            searchLiveWeb(transcript);
+          } else if (imageMode) {
             generateImageFromPrompt(transcript);
           } else if (fileMode) {
             askUploadedFile(transcript);
@@ -1645,6 +1744,11 @@ setTimeout(() => {
 
     const userMessage = input.trim();
 
+    if (webSearchMode) {
+      await searchLiveWeb(userMessage);
+      return;
+    }
+
     if (creatorMode) {
       await generateCreatorPackage(userMessage);
       return;
@@ -1751,6 +1855,7 @@ setTimeout(() => {
 
   const applyPromptTemplate = (template) => {
     setImageMode(false);
+    setWebSearchMode(false);
     setCreatorMode(false);
 
     setInput(template.prompt);
@@ -2098,6 +2203,7 @@ setTimeout(() => {
               {fileMode ? " • File Q&A ON" : ""}
               {imageMode ? " • Image Mode ON" : ""}
               {creatorMode ? " • Creator Mode ON" : ""}
+              {webSearchMode ? " • Live Web Search ON" : ""}
             </span>
           </div>
         </header>
@@ -2565,6 +2671,22 @@ setTimeout(() => {
                   <strong>{msg.role === "user" ? "You" : assistantName}</strong>
                   <p>{msg.text}</p>
 
+                  {msg.role === "ai_web" && msg.sources && msg.sources.length > 0 && (
+                    <div className="web-sources-box">
+                      <strong>Sources</strong>
+                      {msg.sources.map((source) => (
+                        <a
+                          key={source.index}
+                          href={source.link}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {source.index}. {source.title}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                   {msg.role === "ai_document" && (
   <div className="message-actions">
     <button
@@ -2693,6 +2815,14 @@ setTimeout(() => {
 
                     <button onClick={openCreatorPanel}>Creator Tools</button>
 
+                    <button onClick={startWebSearchMode}>Live Web Search</button>
+
+                    {webSearchMode && (
+                      <button className="danger-item" onClick={exitWebSearchMode}>
+                        Exit Web Search
+                      </button>
+                    )}
+
                     {creatorMode && (
                       <button className="danger-item" onClick={exitCreatorMode}>
                         Exit Creator Mode
@@ -2727,7 +2857,9 @@ setTimeout(() => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleEnter}
                 placeholder={
-                  creatorMode
+                  webSearchMode
+                    ? "Ask latest/current information..."
+                    : creatorMode
                     ? "Enter your YouTube/video topic..."
                     : imageMode
                     ? "Describe image to generate..."
