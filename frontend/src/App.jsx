@@ -2059,9 +2059,23 @@ setTimeout(() => {
             setSidebarOpen(false);
             setGalleryOpen(false);
             setLibraryOpen(false);
+            setDocumentLibraryOpen(false);
           }}
         >
           Profile Settings
+        </button>
+
+        <button
+          className="settings-page-btn"
+          onClick={() => {
+            setCurrentView("settings");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+            setDocumentLibraryOpen(false);
+          }}
+        >
+          Settings
         </button>
 
         <button className="new-chat" onClick={createNewChat}>
@@ -2071,50 +2085,6 @@ setTimeout(() => {
         <button className="logout-btn" onClick={logout}>
           Logout
         </button>
-
-        <div className="settings-box">
-          <p>Assistant Settings</p>
-
-          <label>Assistant Name</label>
-          <input
-            value={assistantName}
-            onChange={(e) => setAssistantName(e.target.value)}
-            placeholder="Enter assistant name"
-          />
-
-          <label>Personality</label>
-          <select
-            value={personality}
-            onChange={(e) => setPersonality(e.target.value)}
-          >
-            <option value="friendly">Friendly</option>
-            <option value="professional">Professional</option>
-            <option value="formal">Formal</option>
-            <option value="sarcastic">Sarcastic</option>
-          </select>
-
-          <label>Voice Output</label>
-          <select
-            value={voiceOutput ? "on" : "off"}
-            onChange={(e) => setVoiceOutput(e.target.value === "on")}
-          >
-            <option value="on">Voice On</option>
-            <option value="off">Voice Off</option>
-          </select>
-
-          <label>Live Voice Mode</label>
-          <select
-            value={liveMode ? "on" : "off"}
-            onChange={(e) => setLiveMode(e.target.value === "on")}
-          >
-            <option value="off">Live Mode Off</option>
-            <option value="on">Live Mode On</option>
-          </select>
-
-          <button onClick={saveSettings} disabled={settingsLoading}>
-            {settingsLoading ? "Saving..." : "Save Settings"}
-          </button>
-        </div>
 
         <div className="memory-box">
           <p>Memory Controls</p>
@@ -2227,6 +2197,7 @@ setTimeout(() => {
             currentView !== "dashboard" &&
             currentView !== "library" &&
             currentView !== "profile" &&
+            currentView !== "settings" &&
             !galleryOpen && (
               <div className="creator-panel">
                 <div className="creator-panel-header">
@@ -2269,7 +2240,73 @@ setTimeout(() => {
               </div>
             )}
 
-          {currentView === "profile" ? (
+          {currentView === "settings" ? (
+            <div className="settings-page-view">
+              <div className="settings-page-hero">
+                <div>
+                  <p className="settings-page-badge">Assistant Control</p>
+                  <h2>Assistant Settings</h2>
+                  <p>
+                    Customize your AI assistant name, personality, voice output and live voice mode.
+                  </p>
+                </div>
+
+                <button onClick={() => setCurrentView("chat")}>Back to Chat</button>
+              </div>
+
+              <div className="settings-page-grid">
+                <div className="settings-page-card">
+                  <h3>Assistant Identity</h3>
+
+                  <label>Assistant Name</label>
+                  <input
+                    value={assistantName}
+                    onChange={(e) => setAssistantName(e.target.value)}
+                    placeholder="Enter assistant name"
+                  />
+
+                  <label>Personality</label>
+                  <select
+                    value={personality}
+                    onChange={(e) => setPersonality(e.target.value)}
+                  >
+                    <option value="friendly">Friendly</option>
+                    <option value="professional">Professional</option>
+                    <option value="formal">Formal</option>
+                    <option value="sarcastic">Sarcastic</option>
+                  </select>
+
+                  <button onClick={saveSettings} disabled={settingsLoading}>
+                    {settingsLoading ? "Saving..." : "Save Settings"}
+                  </button>
+                </div>
+
+                <div className="settings-page-card">
+                  <h3>Voice Settings</h3>
+
+                  <label>Voice Output</label>
+                  <select
+                    value={voiceOutput ? "on" : "off"}
+                    onChange={(e) => setVoiceOutput(e.target.value === "on")}
+                  >
+                    <option value="on">Voice On</option>
+                    <option value="off">Voice Off</option>
+                  </select>
+
+                  <label>Live Voice Mode</label>
+                  <select
+                    value={liveMode ? "on" : "off"}
+                    onChange={(e) => setLiveMode(e.target.value === "on")}
+                  >
+                    <option value="off">Live Mode Off</option>
+                    <option value="on">Live Mode On</option>
+                  </select>
+
+                  <button onClick={stopVoiceSystem}>Stop Voice System</button>
+                </div>
+              </div>
+            </div>
+          ) : currentView === "profile" ? (
             <div className="profile-settings-view">
               <div className="profile-hero">
                 <div>
@@ -2794,6 +2831,7 @@ setTimeout(() => {
         {currentView !== "dashboard" &&
           currentView !== "library" &&
           currentView !== "profile" &&
+          currentView !== "settings" &&
           currentView !== "documents" &&
           !galleryOpen && (
             <footer className="input-area">
