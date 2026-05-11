@@ -3822,3 +3822,1094 @@ body {
     font-size: 26px;
   }
 }
+
+/* =========================
+   PROJECT WORKSPACE UI
+========================= */
+
+.project-box {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid rgba(14, 165, 233, 0.28);
+  border-radius: 16px;
+  background: rgba(14, 165, 233, 0.10);
+}
+
+.project-box p {
+  color: #7dd3fc;
+  font-weight: bold;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.project-box label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.project-box select,
+.project-box input,
+.project-box textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  background: rgba(2, 6, 23, 0.92);
+  color: white;
+  outline: none;
+}
+
+.project-box textarea {
+  min-height: 82px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.project-box small {
+  display: block;
+  margin-top: 10px;
+  color: #bae6fd;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.project-box button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  background: rgba(14, 165, 233, 0.14);
+  color: #7dd3fc;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.project-box button:hover {
+  background: rgba(14, 165, 233, 0.22);
+}
+
+.project-box .danger-project-btn {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.project-form {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.72);
+  border: 1px solid rgba(14, 165, 233, 0.18);
+}
+
+.project-form input + input,
+.project-form input + textarea,
+.project-form textarea + label,
+.project-form select + button {
+  margin-top: 10px;
+}
+
+.active-project-line {
+  margin-top: 8px !important;
+  color: #7dd3fc !important;
+  font-size: 13px !important;
+}
+
+
+/* =========================
+   PROJECT WORKSPACES
+========================= */
+.project-box {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 16px;
+  background: rgba(30, 64, 175, 0.14);
+}
+
+.project-box p {
+  color: #93c5fd;
+  font-weight: bold;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.project-box label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.project-box select,
+.project-box input,
+.project-box textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: rgba(2, 6, 23, 0.9);
+  color: white;
+  outline: none;
+}
+
+.project-box textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.project-box small {
+  display: block;
+  margin-top: 8px;
+  color: #cbd5e1;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.project-box button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.project-box button:hover {
+  background: rgba(59, 130, 246, 0.22);
+}
+
+.project-box .danger-project-btn {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.project-form {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+.active-project-line {
+  color: #93c5fd !important;
+  font-size: 14px;
+  margin: 8px 0 !important;
+}
+
+/* =========================
+   CHATGPT-STYLE PROJECTS
+========================= */
+.project-box {
+  margin-top: 18px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+.project-box-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:10px;
+}
+.project-box-header p {
+  margin:0;
+  color:#e5e7eb;
+  font-weight:700;
+  font-size:14px;
+}
+.project-box-header button {
+  border:1px solid rgba(0,234,255,0.22);
+  background:rgba(0,234,255,0.08);
+  color:#67e8f9;
+  border-radius:10px;
+  padding:7px 9px;
+  font-size:12px;
+  cursor:pointer;
+}
+.project-list-item {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:#d1d5db;
+  padding:10px 9px;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:6px;
+  border:1px solid transparent;
+  position:relative;
+}
+.project-list-item:hover,
+.project-list-item.active-project {
+  background:rgba(255,255,255,0.08);
+  border-color:rgba(255,255,255,0.10);
+}
+.project-settings-mini {
+  margin-left:auto;
+  border:none;
+  background:transparent;
+  color:#94a3b8;
+  cursor:pointer;
+  font-size:18px;
+  padding:0 4px;
+}
+.project-helper {
+  display:block;
+  color:#94a3b8;
+  margin-top:6px;
+  font-size:12px;
+}
+.project-modal-backdrop {
+  position:fixed;
+  inset:0;
+  z-index:100;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(5px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.project-modal {
+  width:100%;
+  max-width:520px;
+  border-radius:18px;
+  padding:18px;
+  background:#202123;
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 20px 80px rgba(0,0,0,0.45);
+  color:#fff;
+}
+.project-modal-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+}
+.project-modal-header h2 {
+  margin:0;
+  font-size:20px;
+}
+.project-modal-header button {
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  border:none;
+  background:rgba(255,255,255,0.08);
+  color:white;
+  font-size:20px;
+  cursor:pointer;
+}
+.project-modal label {
+  display:block;
+  margin:12px 0 6px;
+  color:#e5e7eb;
+  font-size:13px;
+}
+.project-modal input,
+.project-modal textarea,
+.project-modal select {
+  width:100%;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:#151515;
+  color:#fff;
+  padding:11px;
+  outline:none;
+}
+.project-modal textarea {
+  min-height:88px;
+  resize:vertical;
+}
+.project-memory-note {
+  margin-top:10px;
+  color:#cbd5e1;
+  background:rgba(255,255,255,0.08);
+  border-radius:12px;
+  padding:12px;
+  font-size:13px;
+  line-height:1.5;
+}
+.project-modal-actions {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:16px;
+}
+.create-project-btn {
+  margin-left:auto;
+  border:none;
+  border-radius:999px;
+  background:#ececf1;
+  color:#111827;
+  font-weight:700;
+  padding:11px 16px;
+  cursor:pointer;
+}
+.create-project-btn:disabled {
+  opacity:.5;
+  cursor:not-allowed;
+}
+.delete-project-btn {
+  border:1px solid rgba(248,113,113,0.35);
+  border-radius:999px;
+  background:rgba(248,113,113,0.08);
+  color:#fca5a5;
+  font-weight:700;
+  padding:10px 14px;
+  cursor:pointer;
+}
+.project-main-view {
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding-top:40px;
+}
+.project-main-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:28px;
+}
+.project-main-header h2 {
+  margin:0;
+  font-size:32px;
+  color:#f8fafc;
+}
+.project-main-header p {
+  margin:8px 0 0;
+  color:#cbd5e1;
+}
+.project-main-header small {
+  display:block;
+  margin-top:6px;
+  color:#94a3b8;
+}
+.project-main-header button {
+  border:none;
+  border-radius:999px;
+  padding:13px 18px;
+  background:#2f2f2f;
+  color:#fff;
+  cursor:pointer;
+}
+.project-tabs {
+  display:flex;
+  gap:12px;
+  margin-bottom:34px;
+}
+.project-tabs button {
+  border:none;
+  border-radius:999px;
+  padding:11px 18px;
+  background:transparent;
+  color:#cbd5e1;
+  cursor:pointer;
+}
+.project-tabs .active-project-tab {
+  background:rgba(255,255,255,0.10);
+  color:#fff;
+}
+.project-empty-state {
+  text-align:center;
+  color:#cbd5e1;
+  padding:50px 10px;
+}
+.project-empty-state h3 {
+  margin:0 0 8px;
+  color:#fff;
+  font-size:22px;
+}
+.project-chat-list {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  max-width:600px;
+  margin:0 auto;
+}
+.project-chat-list button {
+  text-align:left;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.06);
+  color:#fff;
+  padding:14px;
+  border-radius:14px;
+  cursor:pointer;
+}
+.active-project-line {
+  color:#67e8f9 !important;
+}
+@media (max-width:700px){
+  .project-main-header{flex-direction:column;align-items:flex-start;}
+  .project-main-header button{width:100%;}
+  .project-modal{max-height:90vh;overflow:auto;}
+}
+
+
+/* === Final safety overrides === */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 330px;
+  max-width: 88vw;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 20px 90px;
+  background: rgba(2, 6, 23, 0.98);
+  border-right: 1px solid rgba(0, 234, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-105%);
+  transition: transform 0.25s ease;
+  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.4);
+}
+.sidebar.open { transform: translateX(0); }
+.hide-toggle { display: none; }
+@media (max-width: 768px) {
+  .sidebar { width: 92vw; height: 100dvh; border-right: 1px solid rgba(0, 234, 255, 0.22); border-bottom: none; }
+}
+
+/* =========================
+   PROJECT WORKSPACES
+========================= */
+.project-box {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 16px;
+  background: rgba(30, 64, 175, 0.14);
+}
+
+.project-box p {
+  color: #93c5fd;
+  font-weight: bold;
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.project-box label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.project-box select,
+.project-box input,
+.project-box textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  background: rgba(2, 6, 23, 0.9);
+  color: white;
+  outline: none;
+}
+
+.project-box textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.project-box small {
+  display: block;
+  margin-top: 8px;
+  color: #cbd5e1;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.project-box button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.12);
+  color: #93c5fd;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.project-box button:hover {
+  background: rgba(59, 130, 246, 0.22);
+}
+
+.project-box .danger-project-btn {
+  color: #fca5a5;
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+}
+
+.project-form {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+.active-project-line {
+  color: #93c5fd !important;
+  font-size: 14px;
+  margin: 8px 0 !important;
+}
+
+
+/* =========================
+   FINAL CHATGPT-STYLE PROJECT OVERRIDES
+   Paste at the END of App.css
+========================= */
+.sidebar {
+  width: 330px !important;
+  max-width: 88vw !important;
+  height: 100dvh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 18px 90px !important;
+}
+
+.projects-nav-section {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.projects-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.projects-nav-header p {
+  margin: 0;
+  color: #e5e7eb;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.projects-nav-header button {
+  border: 1px solid rgba(0, 234, 255, 0.22);
+  background: rgba(0, 234, 255, 0.08);
+  color: #67e8f9;
+  border-radius: 10px;
+  padding: 7px 9px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.project-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #d1d5db;
+  padding: 10px 9px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 6px;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.project-nav-item:hover,
+.project-nav-item.active-project {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.project-icon {
+  color: #94a3b8;
+  width: 18px;
+  text-align: center;
+}
+
+.project-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-settings-mini {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 4px;
+}
+
+.project-helper {
+  display: block;
+  color: #94a3b8;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.sidebar-actions-clean {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.project-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.project-modal {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 18px;
+  padding: 18px;
+  background: #202123;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 20px 80px rgba(0,0,0,0.45);
+  color: #fff;
+}
+
+.project-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.project-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.project-modal-header button {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.project-modal label {
+  display: block;
+  margin: 12px 0 6px;
+  color: #e5e7eb;
+  font-size: 13px;
+}
+
+.project-modal input,
+.project-modal textarea,
+.project-modal select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #151515;
+  color: #fff;
+  padding: 11px;
+  outline: none;
+}
+
+.project-modal textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.project-memory-note {
+  margin-top: 10px;
+  color: #cbd5e1;
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.project-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.create-project-btn {
+  margin-left: auto;
+  border: none;
+  border-radius: 999px;
+  background: #ececf1;
+  color: #111827;
+  font-weight: 700;
+  padding: 11px 16px;
+  cursor: pointer;
+}
+
+.create-project-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.delete-project-btn {
+  border: 1px solid rgba(248,113,113,0.35);
+  border-radius: 999px;
+  background: rgba(248,113,113,0.08);
+  color: #fca5a5;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.project-main-view {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+.project-main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.project-main-header h2 {
+  margin: 0;
+  font-size: 32px;
+  color: #f8fafc;
+}
+
+.project-main-header p {
+  margin: 8px 0 0;
+  color: #cbd5e1;
+}
+
+.project-main-header small {
+  display: block;
+  margin-top: 6px;
+  color: #94a3b8;
+}
+
+.project-main-header button {
+  border: none;
+  border-radius: 999px;
+  padding: 13px 18px;
+  background: #2f2f2f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.project-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 34px;
+}
+
+.project-tabs button {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 18px;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.project-tabs .active-project-tab {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+}
+
+.project-empty-state {
+  text-align: center;
+  color: #cbd5e1;
+  padding: 50px 10px;
+}
+
+.project-empty-state h3 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 22px;
+}
+
+.project-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.project-chat-list button {
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  padding: 14px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.active-project-line {
+  color: #67e8f9 !important;
+}
+
+@media (max-width:700px){
+  .project-main-header { flex-direction: column; align-items: flex-start; }
+  .project-main-header button { width: 100%; }
+  .project-modal { max-height: 90vh; overflow: auto; }
+}
+
+/* =========================
+   MOBILE PROJECT UI POLISH
+========================= */
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 92vw !important;
+    max-width: 380px !important;
+    height: 100dvh !important;
+    overflow-y: auto !important;
+    padding: 16px 14px 100px !important;
+  }
+
+  .project-box {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .project-box-header {
+    gap: 8px;
+  }
+
+  .project-box-header p {
+    font-size: 13px;
+  }
+
+  .project-box-header button {
+    padding: 8px 10px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+
+  .project-list-item {
+    padding: 11px 9px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+
+  .project-settings-mini {
+    font-size: 18px;
+    padding: 0 6px;
+  }
+
+  .project-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .project-modal {
+    max-width: 100%;
+    width: 100%;
+    max-height: 92dvh;
+    overflow-y: auto;
+    border-radius: 22px 22px 0 0;
+    padding: 18px;
+  }
+
+  .project-modal-header h2 {
+    font-size: 18px;
+  }
+
+  .project-modal input,
+  .project-modal textarea,
+  .project-modal select {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .project-modal-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .create-project-btn,
+  .delete-project-btn {
+    width: 100%;
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .project-main-view {
+    padding: 20px 8px 90px;
+  }
+
+  .project-main-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .project-main-header h2 {
+    font-size: 24px;
+  }
+
+  .project-main-header p {
+    font-size: 14px;
+  }
+
+  .project-main-header button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .project-tabs {
+    width: 100%;
+    overflow-x: auto;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+
+  .project-tabs button {
+    white-space: nowrap;
+    padding: 10px 16px;
+  }
+
+  .project-empty-state {
+    padding: 30px 10px;
+  }
+
+  .project-empty-state h3 {
+    font-size: 18px;
+  }
+
+  .project-chat-list {
+    max-width: 100%;
+  }
+
+  .project-chat-list button {
+    padding: 13px;
+    font-size: 14px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 480px) {
+  .sidebar-toggle {
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 19px;
+  }
+
+  .topbar {
+    padding: 12px 12px 12px 62px;
+  }
+
+  .topbar h1 {
+    font-size: 15px;
+  }
+
+  .topbar span {
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .messages {
+    padding: 10px;
+  }
+
+  .input-area {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .attachment-wrapper {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .input-area input {
+    grid-column: 2;
+    grid-row: 1;
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .voice-btn {
+    height: 42px !important;
+    min-width: 42px !important;
+    width: 42px !important;
+    padding: 0 !important;
+  }
+
+  .input-area > .voice-btn:nth-of-type(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .input-area > .voice-btn:nth-of-type(3) {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .input-area > button:last-child {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    height: 42px;
+    min-width: 82px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .plus-btn {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+  }
+
+  .attachment-menu {
+    bottom: 96px;
+    left: 0;
+    width: 220px;
+  }
+}

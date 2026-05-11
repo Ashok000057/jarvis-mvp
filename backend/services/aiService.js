@@ -12,6 +12,9 @@ const FREE_MODELS = [
 export async function getAIResponse(message, memory = [], settings = {}) {
   const assistantName = settings.assistant_name || "Jarvis";
   const personality = settings.personality || "friendly";
+  const projectInstructions = settings.projectInstructions || "";
+  const projectName = settings.projectName || "";
+  const memoryMode = settings.memoryMode || "new";
 
   const memoryText = memory
     .map((item) => `User: ${item.message}\n${assistantName}: ${item.response}`)
@@ -31,6 +34,16 @@ Rules:
 - If user asks you to remember something, treat it as important.
 - Be honest if you do not know something.
 - Reply in the same language style as user when possible.
+
+
+Project:
+${projectName || "No active project"}
+
+Project instructions:
+${projectInstructions || "No project instructions."}
+
+Project memory mode:
+${memoryMode}
 
 Previous memory:
 ${memoryText || "No previous memory yet."}

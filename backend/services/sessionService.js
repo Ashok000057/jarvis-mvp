@@ -1,16 +1,20 @@
 import { supabase } from "./supabaseClient.js";
 
-export async function createSession(userId, title = "New Chat") {
+export async function createSession(userId, title = "New Chat", projectId = null) {
+  const payload = {
+    user_id: userId,
+    title,
+    pinned: false,
+  };
+
+  if (projectId) {
+    payload.project_id = projectId;
+  }
+
   const { data, error } = await supabase
     .from("chat_sessions")
-    .insert([
-      {
-        user_id: userId,
-        title,
-        pinned: false,
-      },
-    ])
-    .select("id, user_id, title, pinned, created_at")
+    .insert([payload])
+    .select("id, user_id, title, pinned, project_id, created_at")
     .single();
 
   if (error) {
@@ -21,13 +25,19 @@ export async function createSession(userId, title = "New Chat") {
   return data;
 }
 
-export async function getSessions(userId) {
-  const { data, error } = await supabase
+export async function getSessions(userId, projectId = null) {
+  let query = supabase
     .from("chat_sessions")
-    .select("id, title, pinned, created_at")
+    .select("id, title, pinned, project_id, created_at")
     .eq("user_id", userId)
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: false });
+
+  if (projectId) {
+    query = query.eq("project_id", projectId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Get sessions error:", error.message);

@@ -14,9 +14,9 @@ const router = express.Router();
 router.post("/", verifyUser, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { title } = req.body;
+    const { title, projectId } = req.body;
 
-    const session = await createSession(userId, title || "New Chat");
+    const session = await createSession(userId, title || "New Chat", projectId || null);
 
     res.json({
       success: true,
@@ -35,8 +35,9 @@ router.post("/", verifyUser, async (req, res) => {
 router.get("/", verifyUser, async (req, res) => {
   try {
     const userId = req.user.id;
+    const { projectId } = req.query;
 
-    const sessions = await getSessions(userId);
+    const sessions = await getSessions(userId, projectId || null);
 
     res.json({
       success: true,

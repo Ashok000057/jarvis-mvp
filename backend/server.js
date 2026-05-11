@@ -12,6 +12,7 @@ import galleryRoute from "./routes/gallery.js";
 import outputsRoute from "./routes/outputs.js";
 import documentsRoute from "./routes/documents.js";
 import webSearchRoute from "./routes/webSearch.js";
+import projectsRoute from "./routes/projects.js";
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use("/api/gallery", galleryRoute);
 app.use("/api/outputs", outputsRoute);
 app.use("/api/documents", documentsRoute);
 app.use("/api/web", webSearchRoute);
+app.use("/api/projects", projectsRoute);
 
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
