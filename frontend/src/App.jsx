@@ -155,23 +155,20 @@ export default function App() {
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [visibleDocumentId, setVisibleDocumentId] = useState(null);
 
-  const [projects, setProjects] = useState([]);
-  const [activeProjectId, setActiveProjectId] = useState(null);
-  const [activeProject, setActiveProject] = useState(null);
-  const [projectFormOpen, setProjectFormOpen] = useState(false);
-  const [projectEditId, setProjectEditId] = useState(null);
-  const [projectsLoading, setProjectsLoading] = useState(false);
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [projectInstructions, setProjectInstructions] = useState("");
-  const [projectMemoryMode, setProjectMemoryMode] = useState("new");
-
   const [stats, setStats] = useState({
     totalChats: 0,
     savedImages: 0,
   });
 
   const fileInputRef = useRef(null);
+
+  const startSlowTimer = () => {
+  setSlowResponse(false);
+
+  setTimeout(() => {
+    setSlowResponse(true);
+  }, 12000);
+};
 
   useEffect(() => {
     checkUser();
@@ -188,7 +185,7 @@ export default function App() {
   useEffect(() => {
     if (userId) {
       loadSettings();
-      loadProjects();
+      loadSessions();
       loadGallery();
       setCurrentView("dashboard");
     }
@@ -279,204 +276,6 @@ export default function App() {
     ]);
   };
 
-  const loadProjects = async () => {
-    if (!userId) return;
-
-    try {
-      const authConfig = await getAuthHeaders();
-      setProjectsLoading(true);
-
-      const res = await axios.get(`${API_URL}/api/projects`, authConfig);
-
-      if (res.data.success) {
-        const loadedProjects = res.data.projects || [];
-        setProjects(loadedProjects);
-
-        if (loadedProjects.length > 0 && !activeProjectId) {
-          setActiveProjectId(loadedProjects[0].id);
-          setActiveProject(loadedProjects[0]);
-          await loadSessions(loadedProjects[0].id);
-        } else {
-          await loadSessions(activeProjectId || null);
-        }
-      }
-    } catch (error) {
-      console.error("Load projects error:", error);
-    } finally {
-      setProjectsLoading(false);
-    }
-  };
-
-  const createProject = async () => {
-    if (!projectName.trim()) {
-      alert("Project name required");
-      return;
-    }
-
-    try {
-      const authConfig = await getAuthHeaders();
-      setProjectsLoading(true);
-
-      const res = await axios.post(
-        `${API_URL}/api/projects`,
-        {
-          name: projectName.trim(),
-          description: projectDescription.trim(),
-          instructions: projectInstructions.trim(),
-          memoryMode: projectMemoryMode,
-        },
-        authConfig
-      );
-
-      if (res.data.success) {
-        const newProject = res.data.project;
-
-        setProjects((prev) => [newProject, ...prev]);
-        setActiveProjectId(newProject.id);
-        setActiveProject(newProject);
-        setProjectName("");
-        setProjectDescription("");
-        setProjectInstructions("");
-        setProjectMemoryMode("new");
-        setProjectEditId(null);
-        setProjectFormOpen(false);
-        setCurrentView("dashboard");
-        setMessages([
-          {
-            role: "ai",
-            text: `Project created: ${newProject.name}. Memory mode: ${newProject.memory_mode}.`,
-          },
-        ]);
-        await loadSessions(newProject.id);
-      }
-    } catch (error) {
-      console.error("Create project error:", error);
-      alert(error.response?.data?.error || "Failed to create project");
-    } finally {
-      setProjectsLoading(false);
-    }
-  };
-
-  const switchProject = async (projectId) => {
-    const project = projects.find((item) => item.id === projectId) || null;
-
-    setActiveProjectId(projectId || null);
-    setActiveProject(project);
-    setActiveSessionId(null);
-    setFileMode(false);
-    setUploadedFileName("");
-    setImageMode(false);
-    setWebSearchMode(false);
-    setCreatorMode(false);
-    setGalleryOpen(false);
-    setLibraryOpen(false);
-    setDocumentLibraryOpen(false);
-    setCurrentView("dashboard");
-
-    setMessages([
-      {
-        role: "ai",
-        text: project
-          ? `Project switched: ${project.name}. Memory mode: ${project.memory_mode}.`
-          : "No project selected. General workspace active.",
-      },
-    ]);
-
-    await loadSessions(projectId || null);
-  };
-
-  const deleteActiveProject = async () => {
-    if (!activeProjectId) {
-      alert("No active project selected");
-      return;
-    }
-
-    const confirmDelete = window.confirm(
-      "Delete this project workspace? Chats stay in database but project workspace will be removed."
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      const authConfig = await getAuthHeaders();
-      await axios.delete(`${API_URL}/api/projects/${activeProjectId}`, authConfig);
-
-      const remaining = projects.filter((item) => item.id !== activeProjectId);
-      setProjects(remaining);
-
-      const nextProject = remaining[0] || null;
-      setActiveProjectId(nextProject?.id || null);
-      setActiveProject(nextProject);
-      await loadSessions(nextProject?.id || null);
-    } catch (error) {
-      console.error("Delete project error:", error);
-      alert("Failed to delete project");
-    }
-  };
-
-  const resetProjectForm = () => {
-    setProjectName("");
-    setProjectDescription("");
-    setProjectInstructions("");
-    setProjectMemoryMode("new");
-    setProjectEditId(null);
-    setProjectFormOpen(false);
-  };
-
-  const openNewProjectModal = () => {
-    setProjectName("");
-    setProjectDescription("");
-    setProjectInstructions("");
-    setProjectMemoryMode("new");
-    setProjectEditId(null);
-    setProjectFormOpen(true);
-  };
-
-  const openProjectSettings = (project) => {
-    setProjectEditId(project.id);
-    setProjectName(project.name || "");
-    setProjectDescription(project.description || "");
-    setProjectInstructions(project.instructions || "");
-    setProjectMemoryMode(project.memory_mode || "new");
-    setProjectFormOpen(true);
-  };
-
-  const updateProject = async () => {
-    if (!projectEditId) return;
-    if (!projectName.trim()) {
-      alert("Project name required");
-      return;
-    }
-
-    try {
-      const authConfig = await getAuthHeaders();
-      setProjectsLoading(true);
-
-      const res = await axios.patch(
-        `${API_URL}/api/projects/${projectEditId}`,
-        {
-          name: projectName.trim(),
-          description: projectDescription.trim(),
-          instructions: projectInstructions.trim(),
-          memoryMode: projectMemoryMode,
-        },
-        authConfig
-      );
-
-      if (res.data.success) {
-        const updated = res.data.project;
-        setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-        if (activeProjectId === updated.id) setActiveProject(updated);
-        resetProjectForm();
-      }
-    } catch (error) {
-      console.error("Update project error:", error);
-      alert("Failed to update project");
-    } finally {
-      setProjectsLoading(false);
-    }
-  };
-
   const loadSettings = async () => {
     if (!userId) return;
 
@@ -504,17 +303,13 @@ export default function App() {
     }
   };
 
-  const loadSessions = async (projectId = activeProjectId) => {
+  const loadSessions = async () => {
     if (!userId) return;
 
     try {
       const authConfig = await getAuthHeaders();
 
-      const sessionsUrl = projectId
-        ? `${API_URL}/api/sessions?projectId=${projectId}`
-        : `${API_URL}/api/sessions`;
-
-      const res = await axios.get(sessionsUrl, authConfig);
+      const res = await axios.get(`${API_URL}/api/sessions`, authConfig);
 
       if (res.data.success) {
         const loadedSessions = res.data.sessions || [];
@@ -542,7 +337,7 @@ export default function App() {
 
       const res = await axios.post(
         `${API_URL}/api/sessions`,
-        { title: "New Chat", projectId: activeProjectId },
+        { title: "New Chat" },
         authConfig
       );
 
@@ -1054,7 +849,6 @@ Rules:
               creatorTopic.length > 32
                 ? creatorTopic.slice(0, 32) + "..."
                 : creatorTopic,
-            projectId: activeProjectId,
           },
           authConfig
         );
@@ -1870,7 +1664,6 @@ setTimeout(() => {
               userMessage.length > 32
                 ? userMessage.slice(0, 32) + "..."
                 : userMessage,
-            projectId: activeProjectId,
           },
           authConfig
         );
@@ -1984,7 +1777,6 @@ setTimeout(() => {
               userMessage.length > 32
                 ? userMessage.slice(0, 32) + "..."
                 : userMessage,
-            projectId: activeProjectId,
           },
           authConfig
         );
@@ -2248,85 +2040,85 @@ setTimeout(() => {
           </button>
         </div>
 
+        <button
+          className="dashboard-btn"
+          onClick={() => {
+            setCurrentView("dashboard");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+          }}
+        >
+          Dashboard
+        </button>
+
+        <button
+          className="profile-btn"
+          onClick={() => {
+            setCurrentView("profile");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+            setDocumentLibraryOpen(false);
+          }}
+        >
+          Profile Settings
+        </button>
+
+        <button
+          className="settings-page-btn"
+          onClick={() => {
+            setCurrentView("settings");
+            setSidebarOpen(false);
+            setGalleryOpen(false);
+            setLibraryOpen(false);
+            setDocumentLibraryOpen(false);
+          }}
+        >
+          Settings
+        </button>
+
         <button className="new-chat" onClick={createNewChat}>
           + New Chat
         </button>
 
-        <div className="projects-nav-section">
-          <div className="projects-nav-header">
-            <p>Projects</p>
-            <button onClick={openNewProjectModal}>+ New project</button>
-          </div>
+        <button className="logout-btn" onClick={logout}>
+          Logout
+        </button>
 
-          <div
-            className={`project-nav-item ${!activeProjectId ? "active-project" : ""}`}
-            onClick={() => switchProject("")}
-          >
-            <span className="project-icon">⌂</span>
-            <span>General Workspace</span>
-          </div>
+        <div className="memory-box">
+          <p>Memory Controls</p>
 
-          {projectsLoading && <small className="project-helper">Loading projects...</small>}
+          <button onClick={clearCurrentChat}>Clear Current Chat</button>
 
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className={`project-nav-item ${activeProjectId === project.id ? "active-project" : ""}`}
-              onClick={() => switchProject(project.id)}
-            >
-              <span className="project-icon">▣</span>
-              <span className="project-name">{project.name}</span>
-              <button
-                className="project-settings-mini"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openProjectSettings(project);
-                }}
-                aria-label="Project settings"
-              >
-                ⋯
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="sidebar-actions-clean">
-          <button
-            className="dashboard-btn"
-            onClick={() => {
-              setCurrentView("dashboard");
-              setSidebarOpen(false);
-              setGalleryOpen(false);
-              setLibraryOpen(false);
-            }}
-          >
-            Dashboard
+          <button className="export-memory" onClick={exportCurrentChat}>
+            Export Current Chat
           </button>
 
-          <button
-            className="profile-btn"
-            onClick={() => {
-              setCurrentView("profile");
-              setSidebarOpen(false);
-              setGalleryOpen(false);
-              setLibraryOpen(false);
-            }}
-          >
-            Profile Settings
-          </button>
-
-          <button
-            className="settings-page-btn"
-            onClick={() => {
-              setCurrentView("settings");
-              setSidebarOpen(false);
-              setGalleryOpen(false);
-              setLibraryOpen(false);
-            }}
-          >
-            Settings
+          <button className="danger-memory" onClick={clearAllMemory}>
+            Clear All Memory
           </button>
         </div>
+
+        <div className="library-box">
+  <p>Content Library</p>
+
+  <button onClick={openContentLibrary}>Open Saved Outputs</button>
+</div>
+
+<div className="document-box">
+  <p>Document Library</p>
+
+  <button onClick={openDocumentLibrary}>
+    Open Saved Documents
+  </button>
+</div>
+
+<div className="gallery-box">
+  <p>Image Gallery</p>
+
+  <button onClick={openGallery}>Open Saved Gallery</button>
+</div>
 
         <div className="history">
           <p>Recent Chats</p>
@@ -2371,65 +2163,6 @@ setTimeout(() => {
         </div>
       </aside>
 
-
-
-      {projectFormOpen && (
-        <div className="project-modal-backdrop">
-          <div className="project-modal">
-            <div className="project-modal-header">
-              <h2>{projectEditId ? "Project settings" : "Create project"}</h2>
-              <button onClick={resetProjectForm}>×</button>
-            </div>
-
-            <label>Project name</label>
-            <input
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Copenhagen Trip"
-            />
-
-            <label>Instructions</label>
-            <textarea
-              value={projectInstructions}
-              onChange={(e) => setProjectInstructions(e.target.value)}
-              placeholder="Set context and customize how Jarvis responds in this project."
-            />
-
-            <label>Memory</label>
-            <select
-              value={projectMemoryMode}
-              onChange={(e) => setProjectMemoryMode(e.target.value)}
-              disabled={Boolean(projectEditId)}
-            >
-              <option value="all">Default — access memories from all chats</option>
-              <option value="new">Project-only — use fresh project memory</option>
-            </select>
-
-            <div className="project-memory-note">
-              {projectMemoryMode === "all"
-                ? "Project can access memories from outside chats, and vice versa."
-                : "Project can only access its own memories. Outside memories are hidden."}
-            </div>
-
-            <div className="project-modal-actions">
-              {projectEditId && (
-                <button className="delete-project-btn" onClick={deleteActiveProject}>
-                  Delete project
-                </button>
-              )}
-
-              <button
-                className="create-project-btn"
-                onClick={projectEditId ? updateProject : createProject}
-                disabled={projectsLoading || !projectName.trim()}
-              >
-                {projectEditId ? "Save changes" : "Create project"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <main className="chat-area">
         <header className="topbar">
           <div>
@@ -2464,6 +2197,7 @@ setTimeout(() => {
             currentView !== "dashboard" &&
             currentView !== "library" &&
             currentView !== "profile" &&
+            currentView !== "settings" &&
             !galleryOpen && (
               <div className="creator-panel">
                 <div className="creator-panel-header">
@@ -2506,45 +2240,71 @@ setTimeout(() => {
               </div>
             )}
 
-          {currentView === "project" ? (
-            <div className="project-main-view">
-              <div className="project-main-header">
+          {currentView === "settings" ? (
+            <div className="settings-page-view">
+              <div className="settings-page-hero">
                 <div>
-                  <h2>{activeProject?.name || "Project"}</h2>
-                  <p>{activeProject?.instructions || "No project instructions yet."}</p>
-                  <small>
-                    Memory: {activeProject?.memory_mode === "all" ? "Default / all chats memory" : "Project-only memory"}
-                  </small>
+                  <p className="settings-page-badge">Assistant Control</p>
+                  <h2>Assistant Settings</h2>
+                  <p>
+                    Customize your AI assistant name, personality, voice output and live voice mode.
+                  </p>
                 </div>
 
-                <button onClick={createNewChat}>+ New chat in project</button>
+                <button onClick={() => setCurrentView("chat")}>Back to Chat</button>
               </div>
 
-              <div className="project-tabs">
-                <button className="active-project-tab">Chats</button>
-                <button>Sources</button>
-              </div>
+              <div className="settings-page-grid">
+                <div className="settings-page-card">
+                  <h3>Assistant Identity</h3>
 
-              {sessions.length === 0 ? (
-                <div className="project-empty-state">
-                  <h3>No chats yet</h3>
-                  <p>Chats in this project will live here.</p>
+                  <label>Assistant Name</label>
+                  <input
+                    value={assistantName}
+                    onChange={(e) => setAssistantName(e.target.value)}
+                    placeholder="Enter assistant name"
+                  />
+
+                  <label>Personality</label>
+                  <select
+                    value={personality}
+                    onChange={(e) => setPersonality(e.target.value)}
+                  >
+                    <option value="friendly">Friendly</option>
+                    <option value="professional">Professional</option>
+                    <option value="formal">Formal</option>
+                    <option value="sarcastic">Sarcastic</option>
+                  </select>
+
+                  <button onClick={saveSettings} disabled={settingsLoading}>
+                    {settingsLoading ? "Saving..." : "Save Settings"}
+                  </button>
                 </div>
-              ) : (
-                <div className="project-chat-list">
-                  {sessions.map((session) => (
-                    <button
-                      key={session.id}
-                      onClick={() => {
-                        setCurrentView("chat");
-                        openSession(session.id);
-                      }}
-                    >
-                      {session.pinned ? "📌 " : ""}{session.title}
-                    </button>
-                  ))}
+
+                <div className="settings-page-card">
+                  <h3>Voice Settings</h3>
+
+                  <label>Voice Output</label>
+                  <select
+                    value={voiceOutput ? "on" : "off"}
+                    onChange={(e) => setVoiceOutput(e.target.value === "on")}
+                  >
+                    <option value="on">Voice On</option>
+                    <option value="off">Voice Off</option>
+                  </select>
+
+                  <label>Live Voice Mode</label>
+                  <select
+                    value={liveMode ? "on" : "off"}
+                    onChange={(e) => setLiveMode(e.target.value === "on")}
+                  >
+                    <option value="off">Live Mode Off</option>
+                    <option value="on">Live Mode On</option>
+                  </select>
+
+                  <button onClick={stopVoiceSystem}>Stop Voice System</button>
                 </div>
-              )}
+              </div>
             </div>
           ) : currentView === "profile" ? (
             <div className="profile-settings-view">
@@ -2654,12 +2414,6 @@ setTimeout(() => {
                 <div>
                   <p className="dashboard-badge">Welcome back</p>
                   <h2>{assistantName} Dashboard</h2>
-                  <p className="active-project-line">
-                    Active Project: {activeProject?.name || "General Workspace"}
-                    {activeProject
-                      ? ` • ${activeProject.memory_mode === "all" ? "All chats memory" : "Fresh memory"}`
-                      : ""}
-                  </p>
                   <p>
                     Your AI workspace for chat, files, voice, images, and creator tools.
                   </p>
@@ -3077,6 +2831,7 @@ setTimeout(() => {
         {currentView !== "dashboard" &&
           currentView !== "library" &&
           currentView !== "profile" &&
+          currentView !== "settings" &&
           currentView !== "documents" &&
           !galleryOpen && (
             <footer className="input-area">
