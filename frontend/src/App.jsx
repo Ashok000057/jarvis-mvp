@@ -105,6 +105,8 @@ export default function App() {
 
   const [assistantName, setAssistantName] = useState("Jarvis");
   const [personality, setPersonality] = useState("friendly");
+  const [characterBrain, setCharacterBrain] = useState("default");
+  const [reactionStyle, setReactionStyle] = useState("cool");
 
   const [sessions, setSessions] = useState([]);
   const [activeSessionId, setActiveSessionId] = useState(null);
@@ -172,6 +174,14 @@ export default function App() {
   });
 
   const fileInputRef = useRef(null);
+
+  const startSlowTimer = () => {
+    setSlowResponse(false);
+
+    setTimeout(() => {
+      setSlowResponse(true);
+    }, 12000);
+  };
 
   useEffect(() => {
     checkUser();
@@ -491,6 +501,8 @@ export default function App() {
 
         setAssistantName(name);
         setPersonality(tone);
+        setCharacterBrain(res.data.settings.character_brain || "default");
+        setReactionStyle(res.data.settings.reaction_style || "cool");
 
         setMessages([
           {
@@ -1088,7 +1100,6 @@ setTimeout(() => {
         {
           message: creatorPrompt,
           sessionId,
-          projectId: activeProjectId,
         },
         authConfig
       );
@@ -1236,7 +1247,6 @@ setTimeout(() => {
         {
           message: creatorPrompt,
           sessionId: activeSessionId,
-          projectId: activeProjectId,
         },
         authConfig
       );
@@ -1832,6 +1842,8 @@ setTimeout(() => {
         {
           assistantName: assistantName.trim(),
           personality,
+          characterBrain,
+          reactionStyle,
         },
         authConfig
       );
@@ -1906,7 +1918,6 @@ setTimeout(() => {
         {
           message: userMessage,
           sessionId,
-          projectId: activeProjectId,
         },
         authConfig
       );
@@ -2021,7 +2032,6 @@ setTimeout(() => {
         {
           message: userMessage,
           sessionId,
-          projectId: activeProjectId,
         },
         authConfig
       );
@@ -2510,7 +2520,125 @@ setTimeout(() => {
               </div>
             )}
 
-          {currentView === "project" ? (
+          {currentView === "settings" ? (
+            <div className="settings-page-view">
+              <div className="settings-page-hero">
+                <div>
+                  <p className="settings-page-badge">Assistant Control</p>
+                  <h2>Assistant Settings</h2>
+                  <p>
+                    Customize assistant name, personality, Parivaar Brain Mode, voice output and live voice mode.
+                  </p>
+                </div>
+
+                <button onClick={() => setCurrentView("chat")}>Back to Chat</button>
+              </div>
+
+              <div className="settings-page-grid">
+                <div className="settings-page-card">
+                  <h3>Assistant Identity</h3>
+
+                  <label>Assistant Name</label>
+                  <input
+                    value={assistantName}
+                    onChange={(e) => setAssistantName(e.target.value)}
+                    placeholder="Enter assistant name"
+                  />
+
+                  <label>Personality</label>
+                  <select
+                    value={personality}
+                    onChange={(e) => setPersonality(e.target.value)}
+                  >
+                    <option value="friendly">Friendly</option>
+                    <option value="professional">Professional</option>
+                    <option value="formal">Formal</option>
+                    <option value="sarcastic">Sarcastic</option>
+                  </select>
+                </div>
+
+                <div className="settings-page-card parivaar-brain-card">
+                  <h3>Parivaar Brain Mode</h3>
+                  <p className="settings-help-text">
+                    Choose an Indian family/social character. The assistant will talk like that character and react with concern, questions, guidance and motivation.
+                  </p>
+
+                  <label>Character Brain</label>
+                  <select
+                    value={characterBrain}
+                    onChange={(e) => setCharacterBrain(e.target.value)}
+                  >
+                    <option value="default">Default Assistant</option>
+                    <option value="grandfather">Dadaji / Grandfather</option>
+                    <option value="grandmother">Dadiji / Grandmother</option>
+                    <option value="father">Papa / Father</option>
+                    <option value="mother">Mummy / Mother</option>
+                    <option value="sister">Behen / Sister</option>
+                    <option value="brother">Bhai / Brother</option>
+                    <option value="relative">Rishtedaar / Relative</option>
+                    <option value="neighbour">Padosi / Neighbour</option>
+                    <option value="friend">Dost / Friend</option>
+                    <option value="girlfriend">Girlfriend</option>
+                    <option value="boyfriend">Boyfriend</option>
+                  </select>
+
+                  <label>Reaction Style</label>
+                  <select
+                    value={reactionStyle}
+                    onChange={(e) => setReactionStyle(e.target.value)}
+                  >
+                    <option value="cool">Cool</option>
+                    <option value="strict">Strict</option>
+                  </select>
+
+                  <div className="character-preview-box">
+                    {characterBrain === "default" ? (
+                      <p>Default assistant mode: normal helpful AI response.</p>
+                    ) : (
+                      <p>
+                        Parivaar mode active: the assistant will speak like the selected character.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="settings-page-card">
+                  <h3>Voice Settings</h3>
+
+                  <label>Voice Output</label>
+                  <select
+                    value={voiceOutput ? "on" : "off"}
+                    onChange={(e) => setVoiceOutput(e.target.value === "on")}
+                  >
+                    <option value="on">Voice On</option>
+                    <option value="off">Voice Off</option>
+                  </select>
+
+                  <label>Live Voice Mode</label>
+                  <select
+                    value={liveMode ? "on" : "off"}
+                    onChange={(e) => setLiveMode(e.target.value === "on")}
+                  >
+                    <option value="off">Live Mode Off</option>
+                    <option value="on">Live Mode On</option>
+                  </select>
+
+                  <button onClick={stopVoiceSystem}>Stop Voice System</button>
+                </div>
+
+                <div className="settings-page-card settings-save-card">
+                  <h3>Save Changes</h3>
+                  <p className="settings-help-text">
+                    Save assistant identity, personality and Parivaar Brain Mode to your account.
+                  </p>
+
+                  <button onClick={saveSettings} disabled={settingsLoading}>
+                    {settingsLoading ? "Saving..." : "Save Settings"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : currentView === "project" ? (
             <div className="project-main-view">
               <div className="project-main-header">
                 <div>
@@ -3081,6 +3209,7 @@ setTimeout(() => {
         {currentView !== "dashboard" &&
           currentView !== "library" &&
           currentView !== "profile" &&
+          currentView !== "settings" &&
           currentView !== "documents" &&
           !galleryOpen && (
             <footer className="input-area">
